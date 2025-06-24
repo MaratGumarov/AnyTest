@@ -69,38 +69,31 @@
     /* Styles for swipeable cards */
     .swipe-card {
       position: absolute;
-      width: calc(100% - 2rem); /* Full width with padding */
-      max-width: 600px; /* Увеличенная максимальная ширина */
+      width: calc(100% - 2rem);
+      max-width: 600px;
       height: auto;
-      min-height: 500px; /* Увеличенная минимальная высота */
-      max-height: calc(100vh - 200px); /* Максимальная высота относительно экрана */
-      will-change: transform, opacity;
-      transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+      min-height: 500px;
+      max-height: calc(100vh - 200px);
+      will-change: transform, opacity, filter;
       cursor: grab;
-      touch-action: manipulation; /* Улучшенное сенсорное управление */
+      touch-action: manipulation;
       left: 50%;
       top: 50%;
-      transform: translate(-50%, -50%); /* Центрирование карточки */
+      transform: translate(-50%, -50%);
+      backface-visibility: hidden; /* Улучшение производительности анимации */
+      -webkit-backface-visibility: hidden;
     }
     .swipe-card:active {
       cursor: grabbing;
     }
-    
-    /* Анимации для свайпов */
-    .swipe-card.swiping-next {
-      transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-    }
-    
-    .swipe-card.swiping-prev {
-      transition: transform 0.3s ease-out;
-    }
     .swipe-card-content {
-      overflow-y: auto; /* Allow scrolling within the card */
-      max-height: calc(100vh - 250px); /* Больше пространства для содержимого */
+      overflow-y: auto;
+      max-height: calc(100vh - 250px);
       height: 100%;
       display: flex;
       flex-direction: column;
-      touch-action: pan-y; /* Разрешить только вертикальный скролл внутри карточки */
+      touch-action: pan-y;
+      transform: translateZ(0); /* Создание слоя для GPU ускорения */
     }
 
     /* Hide scrollbar for card content but keep functionality */
