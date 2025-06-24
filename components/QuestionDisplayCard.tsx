@@ -4,7 +4,8 @@ import remarkGfm from 'remark-gfm';
 import { QuestionItem, SpeechRecognitionState } from '../types';
 import { evaluateAnswerWithAPI } from '../services/geminiService';
 import Spoiler from './Spoiler';
-import { MicrophoneIcon, StopIcon, CheckIcon } from './icons';
+import { MicrophoneIcon, StopIcon, CheckIcon, EyeIcon } from './icons';
+import { Button, Card, Textarea } from './ui';
 
 interface QuestionDisplayCardProps {
   questionItem: QuestionItem;
@@ -43,7 +44,7 @@ const QuestionDisplayCard: React.FC<QuestionDisplayCardProps> = ({
       setLocalAnswer(newAnswer);
       onUserAnswerChange(questionItem.id, newAnswer);
     }
-  }, [speechState.transcript, isCurrentCard]);
+  }, [speechState.transcript, isCurrentCard, localAnswer, onUserAnswerChange, questionItem.id]);
 
   const handleAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
@@ -94,105 +95,107 @@ const QuestionDisplayCard: React.FC<QuestionDisplayCardProps> = ({
   return (
     <div
       ref={cardRef}
-      className="swipe-card animate-scale-in"
+      className="question-card h-full overflow-y-auto custom-scrollbar"
       style={cardStyle}
     >
-      <div className="h-full flex flex-col p-4 md:p-6">
+      <div className="flex flex-col p-4 md:p-6 min-h-full">
         {/* Заголовок с темой */}
         <div className="flex items-center justify-between mb-4">
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200 glass-effect">
             {questionItem.topic}
           </span>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleCorrectAnswerVisibility}
+            leftIcon={<EyeIcon className="w-3 h-3" />}
+            className="text-xs"
+          >
+            Ответ
+          </Button>
         </div>
 
         {/* Вопрос */}
         <div className="mb-6">
-          <h2 className="text-lg md:text-xl font-semibold text-slate-800 dark:text-slate-200 leading-relaxed text-balance">
+          <h2 className="text-lg md:text-xl font-semibold text-slate-900 dark:text-slate-200 leading-relaxed text-balance">
             {questionItem.questionText}
           </h2>
         </div>
 
+        {/* Правильный ответ */}
+        {questionItem.isCorrectAnswerVisible && (
+                  <Card variant="glass" padding="sm" className="mb-4 animate-fade-in-up bg-emerald-50 dark:bg-gradient-to-r dark:from-emerald-500/20 dark:to-teal-500/20 border-emerald-200 dark:border-emerald-400/30">
+          <h3 className="font-medium text-emerald-800 dark:text-emerald-300 mb-2 text-sm">✨ Правильный ответ:</h3>
+          <p className="text-emerald-700 dark:text-emerald-100 text-sm leading-relaxed whitespace-pre-wrap">
+              {questionItem.correctAnswer}
+            </p>
+          </Card>
+        )}
+
         {/* Поле для ответа */}
         <div className="flex-grow flex flex-col">
           <div className="relative mb-4">
-            <label htmlFor={`answer-${questionItem.id}`} className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Ваш ответ:
-            </label>
-            <div className="relative">
-              <textarea
-                ref={textareaRef}
-                id={`answer-${questionItem.id}`}
-                value={localAnswer}
-                onChange={handleAnswerChange}
-                placeholder="Введите ваш ответ здесь..."
-                rows={4}
-                className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl resize-none 
-                         bg-white/80 dark:bg-slate-800/80 text-slate-900 dark:text-slate-100
-                         focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-                         placeholder-slate-400 dark:placeholder-slate-500
-                         transition-all duration-200 input-modern custom-scrollbar
-                         backdrop-blur-sm"
-                disabled={questionItem.isCheckingAnswer}
-              />
-              
-              {/* Кнопка голосового ввода */}
-              {speechState.isSupported && isCurrentCard && (
-                <button
-                  onClick={speechState.isListening ? stopListening : startListening}
-                  className={`absolute right-3 top-3 p-2 rounded-lg transition-all duration-200 btn-modern ${
-                    speechState.isListening
-                      ? 'bg-red-500 text-white hover:bg-red-600 glow-effect'
-                      : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
-                  }`}
-                  title={speechState.isListening ? 'Остановить запись' : 'Начать голосовой ввод'}
-                  disabled={questionItem.isCheckingAnswer}
-                >
-                  {speechState.isListening ? (
-                    <StopIcon className="w-4 h-4" />
-                  ) : (
-                    <MicrophoneIcon className="w-4 h-4" />
-                  )}
-                </button>
-              )}
-            </div>
+            <Textarea
+              ref={textareaRef}
+              id={`answer-${questionItem.id}`}
+              label="Ваш ответ:"
+              value={localAnswer}
+              onChange={handleAnswerChange}
+              placeholder="Введите ваш ответ здесь..."
+              rows={4}
+              variant="modern"
+              disabled={questionItem.isCheckingAnswer}
+            />
             
-            {speechState.error && isCurrentCard && (
-              <p className="mt-2 text-sm text-red-600 dark:text-red-400 animate-fade-in-up">
-                {speechState.error}
-              </p>
+            {/* Кнопка голосового ввода */}
+            {speechState.isSupported && isCurrentCard && (
+              <button
+                onClick={speechState.isListening ? stopListening : startListening}
+                className={`absolute right-3 top-8 p-2 rounded-lg transition-all duration-200 btn-modern ${
+                  speechState.isListening
+                    ? 'bg-red-500 text-white hover:bg-red-600 glow-effect'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
+                }`}
+                title={speechState.isListening ? 'Остановить запись' : 'Начать голосовой ввод'}
+                disabled={questionItem.isCheckingAnswer}
+              >
+                {speechState.isListening ? (
+                  <StopIcon className="w-4 h-4" />
+                ) : (
+                  <MicrophoneIcon className="w-4 h-4" />
+                )}
+              </button>
             )}
           </div>
+          
+          {speechState.error && isCurrentCard && (
+            <p className="mb-4 text-sm text-red-600 dark:text-red-400 animate-fade-in-up">
+              {speechState.error}
+            </p>
+          )}
 
           {/* Кнопка проверки ответа */}
-          <button
+          <Button
             onClick={handleCheckAnswer}
             disabled={!localAnswer.trim() || questionItem.isCheckingAnswer}
-            className="w-full mb-4 px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium
-                     hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2
-                     disabled:opacity-50 disabled:cursor-not-allowed
-                     transition-all duration-200 btn-modern hover-lift active-press
-                     dark:focus:ring-offset-slate-800"
+            variant="primary"
+            size="md"
+            fullWidth
+            isLoading={questionItem.isCheckingAnswer}
+            leftIcon={!questionItem.isCheckingAnswer ? <CheckIcon className="w-4 h-4" /> : undefined}
+            className="mb-4"
           >
-            {questionItem.isCheckingAnswer ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                Проверяем ответ...
-              </div>
-            ) : (
-              <div className="flex items-center justify-center">
-                <CheckIcon className="w-4 h-4 mr-2" />
-                Проверить ответ
-              </div>
-            )}
-          </button>
+            {questionItem.isCheckingAnswer ? 'Проверяем ответ...' : 'Проверить ответ'}
+          </Button>
 
           {/* Обратная связь */}
           {questionItem.shortFeedback && (
             <div className="space-y-4 animate-fade-in-up">
-              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl glass-effect">
-                <h3 className="font-medium text-blue-900 dark:text-blue-200 mb-2">Краткая оценка:</h3>
-                <p className="text-blue-800 dark:text-blue-300 text-sm">{questionItem.shortFeedback}</p>
-              </div>
+                        <Card variant="glass" padding="md" className="bg-sky-50 dark:bg-gradient-to-r dark:from-sky-500/20 dark:to-cyan-500/20 border-sky-200 dark:border-sky-400/30">
+            <h3 className="font-medium text-sky-900 dark:text-sky-300 mb-2">💡 Краткая оценка:</h3>
+            <p className="text-sky-800 dark:text-sky-100 text-sm">{questionItem.shortFeedback}</p>
+              </Card>
 
               {questionItem.detailedFeedback && (
                 <Spoiler
@@ -202,24 +205,10 @@ const QuestionDisplayCard: React.FC<QuestionDisplayCardProps> = ({
                   className="glass-effect"
                 >
                   <div className="prose prose-sm dark:prose-invert max-w-none custom-scrollbar">
-                    <ReactMarkdown>{questionItem.detailedFeedback}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{questionItem.detailedFeedback}</ReactMarkdown>
                   </div>
                 </Spoiler>
               )}
-
-              {/* Правильный ответ */}
-              <Spoiler
-                isOpen={questionItem.isCorrectAnswerVisible}
-                onToggle={toggleCorrectAnswerVisibility}
-                title="Правильный ответ"
-                className="glass-effect border-green-200 dark:border-green-800"
-              >
-                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <p className="text-green-800 dark:text-green-300 text-sm leading-relaxed">
-                    {questionItem.correctAnswer}
-                  </p>
-                </div>
-              </Spoiler>
             </div>
           )}
         </div>

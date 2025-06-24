@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -6,6 +5,7 @@ import { QuestionItem, SessionSettings } from '../types';
 import Spoiler from './Spoiler';
 import { DownloadIcon, HomeIcon, ListBulletIcon, SparklesIcon, ChevronDownIcon, ChevronUpIcon, ArrowUturnLeftIcon } from './icons';
 import { APP_TITLE } from '../constants';
+import { Button, Card } from './ui';
 
 interface SummaryScreenProps {
   answeredQuestions: QuestionItem[];
@@ -63,13 +63,13 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({ answeredQuestions, onStar
   const sortedQuestions = [...answeredQuestions].sort((a, b) => a.timestamp - b.timestamp);
 
   return (
-    <div className="screen container mx-auto max-w-3xl p-4 md:p-6">
-      <div className="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-xl shadow-xl">
+    <div className="screen container mx-auto max-w-3xl p-4 md:p-6 h-full overflow-y-auto custom-scrollbar">
+      <Card variant="default" padding="lg" shadow="xl">
         <div className="text-center mb-8">
-            <ListBulletIcon className="w-16 h-16 text-indigo-500 dark:text-indigo-400 mx-auto mb-4" />
-          <h2 className="text-3xl font-bold text-slate-800 dark:text-slate-100">Результаты сессии</h2>
+          <ListBulletIcon className="w-16 h-16 text-indigo-500 dark:text-indigo-400 mx-auto mb-4" />
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Результаты сессии</h2>
           {sessionSettings && (
-            <p className="text-slate-600 dark:text-slate-400 mt-2">
+            <p className="text-slate-700 dark:text-slate-400 mt-2">
               Тема: <span className="font-semibold">{sessionSettings.topic}</span>, 
               Сложность: <span className="font-semibold">{sessionSettings.difficulty}</span>
             </p>
@@ -79,103 +79,128 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({ answeredQuestions, onStar
         {sortedQuestions.length === 0 ? (
           <div className="text-center py-10">
             <SparklesIcon className="w-12 h-12 text-slate-400 dark:text-slate-500 mx-auto mb-4" />
-            <p className="text-slate-600 dark:text-slate-400">Вы не ответили ни на один вопрос в этой сессии.</p>
-            <p className="text-sm text-slate-500 dark:text-slate-500 mt-1">Попробуйте пройти сессию еще раз!</p>
+            <p className="text-slate-700 dark:text-slate-400">Вы не ответили ни на один вопрос в этой сессии.</p>
+            <p className="text-sm text-slate-600 dark:text-slate-500 mt-1">Попробуйте пройти сессию еще раз!</p>
           </div>
         ) : (
           <div className="space-y-4">
             {sortedQuestions.map((item, index) => (
-              <div key={item.id} className="border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
-                <button
+              <Card key={item.id} variant="default" padding="none" className="overflow-hidden">
+                <Button
+                  variant="ghost"
+                  size="md"
+                  fullWidth
                   onClick={() => toggleItemExpansion(item.id)}
-                  className="w-full flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-600/50 transition-colors"
-                  aria-expanded={expandedItems[item.id] || false}
-                  aria-controls={`summary-item-content-${item.id}`}
+                  rightIcon={expandedItems[item.id] ? <ChevronUpIcon className="w-5 h-5" /> : <ChevronDownIcon className="w-5 h-5" />}
+                  className="p-4 justify-between text-left hover:bg-slate-100 dark:hover:bg-slate-600/50"
                 >
-                  <span className="font-medium text-slate-700 dark:text-slate-200 text-left">
+                  <span className="font-medium text-slate-800 dark:text-slate-200">
                     Вопрос {index + 1}: {item.questionText.substring(0, 60)}{item.questionText.length > 60 ? '...' : ''}
                   </span>
-                  {expandedItems[item.id] ? <ChevronUpIcon className="w-5 h-5 text-slate-500 dark:text-slate-400" /> : <ChevronDownIcon className="w-5 h-5 text-slate-500 dark:text-slate-400" />}
-                </button>
+                </Button>
+                
                 {expandedItems[item.id] && (
-                  <div id={`summary-item-content-${item.id}`} className="p-4 bg-white dark:bg-slate-800 space-y-3">
-                    <p className="text-sm text-slate-500 dark:text-slate-400"><strong>Полный вопрос:</strong> {item.questionText}</p>
+                  <div className="p-4 bg-white dark:bg-slate-800 space-y-3">
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      <strong>Полный вопрос:</strong> {item.questionText}
+                    </p>
+                    
                     <div>
-                      <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Ваш ответ:</h4>
-                      <div className="prose prose-sm dark:prose-invert max-w-none p-2 rounded bg-slate-50 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300 whitespace-pre-wrap">
-                        {item.userAnswer || <span className="italic">Ответ не был дан.</span>}
-                      </div>
+                      <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-300 mb-1">Ваш ответ:</h4>
+                      <Card variant="glass" padding="sm" className="bg-slate-50 dark:bg-slate-700/70">
+                        <div className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap text-sm">
+                          {item.userAnswer || <span className="italic">Ответ не был дан.</span>}
+                        </div>
+                      </Card>
                     </div>
+                    
                     {item.correctAnswer && (
-                       <Spoiler
-                          title="Эталонный ответ"
-                          isOpen={!!spoilerVisibility[item.id]?.correctAnswer}
-                          onToggle={() => toggleInnerSpoiler(item.id, 'correctAnswer')}
-                       >
-                           <div className="prose prose-sm dark:prose-invert max-w-none p-2 rounded bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 whitespace-pre-wrap">
-                                {item.correctAnswer}
-                            </div>
-                       </Spoiler>
+                      <Spoiler
+                        title="Эталонный ответ"
+                        isOpen={!!spoilerVisibility[item.id]?.correctAnswer}
+                        onToggle={() => toggleInnerSpoiler(item.id, 'correctAnswer')}
+                      >
+                        <Card variant="glass" padding="sm" className="bg-emerald-50 dark:bg-gradient-to-r dark:from-emerald-500/20 dark:to-teal-500/20 border-emerald-200 dark:border-emerald-400/30">
+                          <div className="text-emerald-700 dark:text-emerald-100 whitespace-pre-wrap text-sm">
+                            {item.correctAnswer}
+                          </div>
+                        </Card>
+                      </Spoiler>
                     )}
+                    
                     {item.shortFeedback && (
                       <div>
-                        <h4 className="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-1">Краткая обратная связь:</h4>
-                        <div className="prose prose-sm max-w-none text-blue-600 dark:text-blue-200 p-2 rounded bg-blue-50 dark:bg-blue-900/30">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.shortFeedback}</ReactMarkdown>
-                        </div>
+                                                  <h4 className="text-sm font-semibold text-sky-700 dark:text-sky-300 mb-1">💡 Краткая обратная связь:</h4>
+                        <Card variant="glass" padding="sm" className="bg-sky-50 dark:bg-gradient-to-r dark:from-sky-500/20 dark:to-cyan-500/20 border-sky-200 dark:border-sky-400/30">
+                          <div className="prose prose-sm max-w-none text-sky-600 dark:text-sky-100">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.shortFeedback}</ReactMarkdown>
+                          </div>
+                        </Card>
                       </div>
                     )}
+                    
                     {item.detailedFeedback && (
-                       <Spoiler
-                          title="Подробная обратная связь"
-                          isOpen={!!spoilerVisibility[item.id]?.detailedFeedback}
-                          onToggle={() => toggleInnerSpoiler(item.id, 'detailedFeedback')}
-                       >
-                            <div className="prose prose-sm dark:prose-invert max-w-none p-2 rounded bg-slate-50 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300">
-                               <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.detailedFeedback}</ReactMarkdown>
-                            </div>
-                       </Spoiler>
+                      <Spoiler
+                        title="Подробная обратная связь"
+                        isOpen={!!spoilerVisibility[item.id]?.detailedFeedback}
+                        onToggle={() => toggleInnerSpoiler(item.id, 'detailedFeedback')}
+                      >
+                        <Card variant="glass" padding="sm">
+                          <div className="prose prose-sm dark:prose-invert max-w-none text-slate-600 dark:text-slate-300">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.detailedFeedback}</ReactMarkdown>
+                          </div>
+                        </Card>
+                      </Spoiler>
                     )}
                   </div>
                 )}
-              </div>
+              </Card>
             ))}
           </div>
         )}
 
         <div className="mt-8 flex flex-col sm:flex-row gap-4">
           {onBackToQuestions && (
-            <button
+            <Button
+              variant="success"
+              size="md"
               onClick={onBackToQuestions}
-              className="w-full sm:w-auto flex-1 flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 dark:focus:ring-offset-slate-800 transition-colors"
+              leftIcon={<ArrowUturnLeftIcon className="w-5 h-5" />}
+              className="flex-1"
             >
-              <ArrowUturnLeftIcon className="mr-2 h-5 w-5" />
               Вернуться к вопросам
-            </button>
+            </Button>
           )}
-          <button
+          
+          <Button
+            variant="primary"
+            size="md"
             onClick={onStartNewSession}
-            className="w-full sm:w-auto flex-1 flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-slate-800 transition-colors"
+            leftIcon={<HomeIcon className="w-5 h-5" />}
+            className="flex-1"
           >
-            <HomeIcon className="mr-2 h-5 w-5" />
             Начать новую сессию
-          </button>
-          <button
+          </Button>
+          
+          <Button
+            variant="secondary"
+            size="md"
             onClick={handleExportData}
             disabled={answeredQuestions.length === 0}
-            className="w-full sm:w-auto flex-1 flex items-center justify-center px-6 py-3 border border-slate-300 dark:border-slate-600 text-base font-medium rounded-md shadow-sm text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            leftIcon={<DownloadIcon className="w-5 h-5" />}
+            className="flex-1"
           >
-            <DownloadIcon className="mr-2 h-5 w-5" />
             Экспортировать результаты
-          </button>
+          </Button>
         </div>
-      </div>
-        <footer className="text-center mt-8 py-4">
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-                &copy; {new Date().getFullYear()} {APP_TITLE}.
-                 На базе Gemini API.
-            </p>
-        </footer>
+      </Card>
+      
+      <footer className="text-center mt-8 py-4">
+        <p className="text-xs text-slate-600 dark:text-slate-400">
+          &copy; {new Date().getFullYear()} {APP_TITLE}.
+          На базе Gemini API.
+        </p>
+      </footer>
     </div>
   );
 };

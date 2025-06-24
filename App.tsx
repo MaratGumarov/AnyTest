@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { QuestionItem, InterviewConfig } from './types';
 import { generateQuestions } from './services/geminiService';
-import ConfigScreen from './components/ConfigScreen';
+import SetupScreen from './components/SetupScreen';
 import QuestionSwiper from './components/QuestionSwiper';
-import ResultsScreen from './components/ResultsScreen';
+import SummaryScreen from './components/SummaryScreen';
 import { LoadingSpinner } from './components/icons';
+import { Button } from './components/ui';
+import ThemeToggle from './components/ThemeToggle';
 
 type AppScreen = 'config' | 'questions' | 'results';
 
@@ -28,7 +30,7 @@ function App() {
         const newQuestions = await generateQuestions(config);
         if (newQuestions.length > 0) {
           setQuestions(prev => [...prev, ...newQuestions]);
-      } else {
+        } else {
           setHasMoreQuestionsToLoad(false);
         }
       } catch (error) {
@@ -62,19 +64,7 @@ function App() {
     }
   };
 
-  const handleNextQuestion = (currentAnsweredQuestion: QuestionItem) => {
-    // Обновляем текущий вопрос в массиве
-    setQuestions(prev => 
-      prev.map(q => q.id === currentAnsweredQuestion.id ? currentAnsweredQuestion : q)
-    );
 
-    // Переходим к следующему вопросу
-    setCurrentQuestionIndex(prev => prev + 1);
-  };
-
-  const handlePreviousQuestion = () => {
-    setCurrentQuestionIndex(prev => Math.max(0, prev - 1));
-  };
 
   const handleUpdateUserAnswer = (questionId: string, answer: string) => {
     setQuestions(prev =>
@@ -100,9 +90,7 @@ function App() {
     );
   };
 
-  const handleEndSession = () => {
-    setCurrentScreen('results');
-  };
+
 
   const handleViewResults = () => {
     setCurrentScreen('results');
@@ -121,17 +109,17 @@ function App() {
     setCurrentScreen('config');
   };
 
-  const canGoPrevious = currentQuestionIndex > 0;
+
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:via-purple-900 dark:to-violet-800 flex items-center justify-center">
         <div className="text-center">
           <LoadingSpinner className="w-16 h-16 mb-4 mx-auto" />
-          <p className="text-xl text-slate-600 dark:text-slate-400">
+          <p className="text-xl text-slate-800 dark:text-slate-400">
             Генерируем вопросы для вас...
           </p>
-          <p className="text-sm text-slate-500 dark:text-slate-500 mt-2">
+          <p className="text-sm text-slate-600 dark:text-slate-500 mt-2">
             Это может занять несколько секунд
           </p>
         </div>
@@ -140,54 +128,50 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800">
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
-        <header className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-white mb-2">
-            AI Interview Coach
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400">
-            Подготовка к техническим собеседованиям с ИИ
-          </p>
-      </header>
-
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:via-purple-900 dark:to-violet-800 overflow-hidden">
+      {/* Переключатель темы - показываем только на экранах с вопросами и результатами */}
+      {currentScreen !== 'config' && (
+        <div className="fixed top-4 right-4 z-50">
+          <ThemeToggle variant="compact" />
+        </div>
+      )}
+      
+      <div className="container mx-auto px-4 py-2 max-w-4xl h-screen">
         {error && (
           <div className="mb-6 p-4 bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
             <p className="text-red-700 dark:text-red-400">{error}</p>
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setError(null)}
-              className="mt-2 text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+              className="mt-2 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 p-0 h-auto"
             >
               Закрыть
-                    </button>
-        </div>
-      )}
+            </Button>
+          </div>
+        )}
 
         {currentScreen === 'config' && (
-          <ConfigScreen onStartInterview={handleStartInterview} />
+          <SetupScreen onStartSession={handleStartInterview} />
         )}
 
         {currentScreen === 'questions' && questions.length > 0 && (
           <QuestionSwiper
             questions={questions}
             startIndex={currentQuestionIndex}
-            onNextQuestion={handleNextQuestion}
-            onPreviousQuestion={handlePreviousQuestion}
             onUpdateUserAnswer={handleUpdateUserAnswer}
             onCheckAnswer={handleCheckAnswer}
             onUpdateQuestionState={handleUpdateQuestionState}
-            onEndSession={handleEndSession}
             onViewResults={handleViewResults}
             isFetchingMore={isFetchingMore}
             hasMoreQuestionsToLoad={hasMoreQuestionsToLoad}
-            canGoPrevious={canGoPrevious}
           />
         )}
 
         {currentScreen === 'results' && (
-          <ResultsScreen
-            questions={questions}
-            config={config}
+          <SummaryScreen
+            answeredQuestions={questions}
+            sessionSettings={config}
             onBackToQuestions={handleBackToQuestions}
             onStartNewSession={handleStartNewSession}
           />
