@@ -40,6 +40,9 @@ export interface SessionSettings {
   topic: string; // This will hold the final topic string (predefined or custom)
 }
 
+// Alias for backward compatibility
+export type InterviewConfig = SessionSettings;
+
 export interface SpeechRecognitionState {
   isListening: boolean;
   transcript: string;

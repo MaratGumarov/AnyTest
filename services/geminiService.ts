@@ -1,7 +1,8 @@
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
-import { Difficulty, GeneratedQuestion, FeedbackResponse } from '../types';
+import { Difficulty, GeneratedQuestion, FeedbackResponse, InterviewConfig } from '../types';
 import { GEMINI_MODEL_TEXT, QUESTION_BATCH_SIZE } from "../constants"; // QUESTION_BATCH_SIZE used as default
 import { getMockQuestions } from './mockData';
+import { generateUUID } from '../utils';
 
 const apiKey = import.meta.env.VITE_API_KEY || "";
 
@@ -165,4 +166,22 @@ export const evaluateAnswerWithAPI = async (questionText: string, correctAnswer:
     const errorMessage = error instanceof Error ? error.message : "Произошла неизвестная ошибка при запросе к AI.";
     throw new Error(`Не удалось оценить ответ: ${errorMessage}`);
   }
+};
+
+export const generateQuestions = async (config: InterviewConfig): Promise<any[]> => {
+  const generatedQuestions = await generateQuestionsFromAPI(QUESTION_BATCH_SIZE, config.difficulty, config.topic);
+  
+  return generatedQuestions.map(q => ({
+    id: generateUUID(),
+    questionText: q.question,
+    correctAnswer: q.answer,
+    topic: config.topic,
+    userAnswer: '',
+    shortFeedback: null,
+    detailedFeedback: null,
+    isCorrectAnswerVisible: false,
+    isDetailedFeedbackVisible: false,
+    isCheckingAnswer: false,
+    timestamp: Date.now()
+  }));
 };
