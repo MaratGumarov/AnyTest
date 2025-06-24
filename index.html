@@ -116,6 +116,25 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      padding-bottom: 80px; /* Отступ снизу для кнопок на мобильных */
+    }
+
+    /* Адаптивные стили для мобильных устройств */
+    @media (max-width: 768px) {
+      .swipe-card {
+        max-width: calc(100vw - 4rem); /* Меньшая ширина на мобильных */
+        min-height: 400px; /* Меньшая минимальная высота */
+        max-height: calc(100vh - 280px); /* Больше места для кнопок */
+      }
+      
+      .swipe-card-content {
+        max-height: calc(100vh - 320px); /* Адаптивная высота содержимого */
+      }
+      
+      .cards-container {
+        height: calc(100vh - 160px); /* Меньшая высота контейнера */
+        padding-bottom: 120px; /* Больше места для кнопок */
+      }
     }
 
 

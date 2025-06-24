@@ -49,36 +49,61 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
     };
     setCardStyles({ [currentQuestion.id]: newCardStyles });
 
-    if (Math.abs(deltaX) > SWIPE_THRESHOLD * 2) { // Commit swipe
-        if (deltaX < -SWIPE_THRESHOLD) { // Swiped Left (Next question)
-            onNextQuestion(currentQuestion);
-        }
-         // Reset style for the swiped card (it will be unmounted or become non-current)
-        setTimeout(() => setCardStyles(prev => ({...prev, [currentQuestion.id]: {}})), 300);
-    }
-  }, [currentQuestion, onNextQuestion]);
+    // Не делаем автоматический переход во время свайпа
+    // Переход происходит только в onSwipedLeft
+  }, [currentQuestion]);
 
 
   const handlers = useSwipeable({
     onSwiping: (eventData) => {
       if(eventData.dir === "Left" || eventData.dir === "Right") { // Only apply transform for horizontal swipes
-        handleSwipe(eventData.deltaX * (eventData.dir === "Left" ? -1 : 1) );
+        handleSwipe(eventData.deltaX); // Убираем дублирование логики направления
       }
     },
     onSwiped: (eventData) => {
       // Reset style after swipe is done, natural position or off-screen if swiped far enough
       if (currentQuestion) {
-        setCardStyles(prev => ({...prev, [currentQuestion.id]: { transition: 'transform 0.3s ease-out, opacity 0.3s ease-out' }}));
+        const shouldAdvance = Math.abs(eventData.deltaX) > SWIPE_THRESHOLD && eventData.deltaX < 0;
+        
+        if (shouldAdvance) {
+          // Анимация ухода карточки влево
+          setCardStyles(prev => ({
+            ...prev, 
+            [currentQuestion.id]: { 
+              transform: 'translate(-50%, -50%) translateX(-100vw) rotate(-30deg)',
+              opacity: 0,
+              transition: 'transform 0.3s ease-out, opacity 0.3s ease-out'
+            }
+          }));
+          
+          // Переход к следующему вопросу после анимации
+          setTimeout(() => {
+            onNextQuestion(currentQuestion);
+            setCardStyles(prev => ({...prev, [currentQuestion.id]: {}}));
+          }, 300);
+        } else {
+          // Возврат в исходное положение
+          setCardStyles(prev => ({
+            ...prev, 
+            [currentQuestion.id]: { 
+              transform: 'translate(-50%, -50%)',
+              opacity: 1,
+              transition: 'transform 0.3s ease-out, opacity 0.3s ease-out'
+            }
+          }));
+        }
       }
     },
     onSwipedLeft: () => {
+        // Дополнительная проверка для свайпа влево
         if (currentQuestion) {
             onNextQuestion(currentQuestion);
         }
     },
-    // onSwipedRight: () => { /* Optional: Go to previous, or other action */ },
     preventScrollOnSwipe: true,
     trackMouse: true,
+    trackTouch: true, // Добавляем для лучшей работы на тачскринах
+    delta: 10, // Увеличиваем чувствительность
   });
 
   const handleManualNext = () => {
@@ -167,22 +192,22 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
        </div>
 
         {currentQuestion && (
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 z-20 p-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full shadow-lg">
+            <div className="fixed bottom-4 left-1/2 -translate-x-1/2 flex gap-3 z-30 p-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-full shadow-lg md:absolute md:bottom-8">
                  <button
                     onClick={onEndSession}
                     title="Завершить сессию и посмотреть результаты"
-                    className="p-3 rounded-full bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50 transition-colors"
+                    className="p-2 md:p-3 rounded-full bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50 transition-colors"
                 >
-                    <XCircleIcon className="w-6 h-6" />
+                    <XCircleIcon className="w-5 h-5 md:w-6 md:h-6" />
                     <span className="sr-only">Завершить сессию</span>
                 </button>
                 <button
                     onClick={handleManualNext}
                     title="Следующий вопрос"
-                    className="p-3 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-colors"
+                    className="p-2 md:p-3 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-colors"
                     disabled={!hasMoreQuestionsToLoad && currentIndex >= questions.length - 1 && !isFetchingMore}
                 >
-                    <ArrowRightIcon className="w-6 h-6" />
+                    <ArrowRightIcon className="w-5 h-5 md:w-6 md:h-6" />
                     <span className="sr-only">Следующий вопрос</span>
                 </button>
             </div>
