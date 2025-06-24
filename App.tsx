@@ -27,8 +27,9 @@ const App: React.FC = () => {
 
   useEffect(() => {
     console.log('[App.tsx] Initial effect runs');
-    if (!process.env.API_KEY) {
-        console.warn('[App.tsx] API_KEY is not set in process.env');
+    const apiKey = import.meta.env.VITE_API_KEY;
+    if (!apiKey || apiKey === "your_gemini_api_key_here") {
+        console.warn('[App.tsx] VITE_API_KEY is not set or is still using placeholder value');
         setGlobalError("Ключ API не настроен. Приложение не сможет генерировать вопросы или получать обратную связь.");
     }
     setIsLoadingInitial(false);

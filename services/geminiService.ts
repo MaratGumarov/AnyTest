@@ -2,11 +2,11 @@ import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { Difficulty, GeneratedQuestion, FeedbackResponse } from '../types';
 import { GEMINI_MODEL_TEXT, QUESTION_BATCH_SIZE } from "../constants"; // QUESTION_BATCH_SIZE used as default
 
-const apiKey = process.env.API_KEY;
+const apiKey = import.meta.env.VITE_API_KEY || "";
 
-if (!apiKey) {
+if (!apiKey || apiKey === "your_gemini_api_key_here") {
   // This message is for the developer console, not for the user.
-  console.error("API_KEY is not set. Please ensure the API_KEY environment variable is configured.");
+  console.error("VITE_API_KEY is not set or is still using the placeholder value. Please ensure the VITE_API_KEY environment variable is configured with your actual Gemini API key.");
   // Potentially throw an error or use a mock service for local development if desired
   // For this exercise, we'll let it proceed and Gemini client will fail if key is truly missing/invalid
 }
