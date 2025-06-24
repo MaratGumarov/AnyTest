@@ -20,7 +20,8 @@ interface QuestionSwiperProps {
   canGoPrevious: boolean;
 }
 
-const SWIPE_THRESHOLD = 50; // pixels
+const SWIPE_THRESHOLD = 30; // Уменьшенный порог для более чувствительных свайпов
+const VERTICAL_THRESHOLD = 40; // Порог для определения вертикального свайпа
 
 const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
   questions,
@@ -38,6 +39,7 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
 }) => {
   const [currentIndex, setCurrentIndex] = useState(startIndex);
   const [cardStyles, setCardStyles] = useState<{ [key: string]: React.CSSProperties }>({});
+  const [isSwipingVertically, setIsSwipingVertically] = useState(false);
   const speechState = useSpeechRecognition();
 
   useEffect(() => {
@@ -46,33 +48,42 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
 
   const currentQuestion = questions[currentIndex];
 
-  const handleSwipe = useCallback((deltaX: number) => {
+  const handleSwipe = useCallback((deltaX: number, deltaY: number) => {
     if (!currentQuestion) return;
 
+    // Определяем, является ли это вертикальным свайпом
+    const isVertical = Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > VERTICAL_THRESHOLD;
+    
+    if (isVertical) {
+      setIsSwipingVertically(true);
+      return; // Не применяем горизонтальные трансформации для вертикальных свайпов
+    }
+
+    setIsSwipingVertically(false);
+
     const newCardStyles: React.CSSProperties = {
-        transform: `translate(-50%, -50%) translateX(${deltaX}px) rotate(${deltaX / 20}deg)`,
-        opacity: 1 - Math.abs(deltaX) / (window.innerWidth / 2),
+        transform: `translate(-50%, -50%) translateX(${deltaX}px) rotate(${deltaX / 25}deg)`,
+        opacity: 1 - Math.abs(deltaX) / (window.innerWidth / 1.5), // Более плавное изменение прозрачности
     };
     setCardStyles({ [currentQuestion.id]: newCardStyles });
-
-    // Не делаем автоматический переход во время свайпа
-    // Переход происходит только в onSwipedLeft
   }, [currentQuestion]);
-
 
   const handlers = useSwipeable({
     onSwiping: (eventData) => {
-      if(eventData.dir === "Left" || eventData.dir === "Right") { // Only apply transform for horizontal swipes
-        handleSwipe(eventData.deltaX);
+      // Проверяем, что это горизонтальный свайп или смешанный
+      const isHorizontalDominant = Math.abs(eventData.deltaX) >= Math.abs(eventData.deltaY) * 0.7;
+      
+      if (isHorizontalDominant) {
+        handleSwipe(eventData.deltaX, eventData.deltaY);
       }
     },
     onSwiped: (eventData) => {
-      if (currentQuestion) {
+      if (currentQuestion && !isSwipingVertically) {
         const shouldGoNext = Math.abs(eventData.deltaX) > SWIPE_THRESHOLD && eventData.deltaX < 0; // Свайп влево - следующий
         const shouldGoPrevious = Math.abs(eventData.deltaX) > SWIPE_THRESHOLD && eventData.deltaX > 0; // Свайп вправо - предыдущий
         
         if (shouldGoNext) {
-          // Анимация ухода карточки влево (следующий вопрос)
+          // Анимация ухода карточки влево (следующий вопрос) - с прозрачностью
           setCardStyles(prev => ({
             ...prev, 
             [currentQuestion.id]: { 
@@ -87,13 +98,13 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
             setCardStyles(prev => ({...prev, [currentQuestion.id]: {}}));
           }, 300);
         } else if (shouldGoPrevious && canGoPrevious) {
-          // Анимация ухода карточки вправо (предыдущий вопрос)
+          // Анимация ухода карточки вправо (предыдущий вопрос) - БЕЗ прозрачности, вытягивание
           setCardStyles(prev => ({
             ...prev, 
             [currentQuestion.id]: { 
-              transform: 'translate(-50%, -50%) translateX(100vw) rotate(30deg)',
-              opacity: 0,
-              transition: 'transform 0.3s ease-out, opacity 0.3s ease-out'
+              transform: 'translate(-50%, -50%) translateX(100vw)',
+              opacity: 1, // Сохраняем полную непрозрачность
+              transition: 'transform 0.3s ease-out'
             }
           }));
           
@@ -113,11 +124,16 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
           }));
         }
       }
+      
+      // Сбрасываем флаг вертикального свайпа
+      setIsSwipingVertically(false);
     },
-    preventScrollOnSwipe: true,
+    preventScrollOnSwipe: false, // Разрешаем скролл
     trackMouse: true,
     trackTouch: true,
-    delta: 10,
+    delta: 5, // Уменьшенная дельта для более чувствительного определения
+    swipeDuration: 500, // Увеличенная длительность для лучшего контроля
+    touchEventOptions: { passive: false }, // Для лучшего контроля событий
   });
 
   const handleManualNext = () => {

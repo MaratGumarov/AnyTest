@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>AI Interview Coach</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -74,10 +74,10 @@
       height: auto;
       min-height: 500px; /* Увеличенная минимальная высота */
       max-height: calc(100vh - 200px); /* Максимальная высота относительно экрана */
-      will-change: transform;
-      transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+      will-change: transform, opacity;
+      transition: transform 0.2s ease-out, opacity 0.2s ease-out;
       cursor: grab;
-      touch-action: pan-y; /* Allow vertical scroll on card content while enabling horizontal pan for swipe */
+      touch-action: manipulation; /* Улучшенное сенсорное управление */
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%); /* Центрирование карточки */
@@ -85,12 +85,22 @@
     .swipe-card:active {
       cursor: grabbing;
     }
+    
+    /* Анимации для свайпов */
+    .swipe-card.swiping-next {
+      transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+    }
+    
+    .swipe-card.swiping-prev {
+      transition: transform 0.3s ease-out;
+    }
     .swipe-card-content {
       overflow-y: auto; /* Allow scrolling within the card */
       max-height: calc(100vh - 250px); /* Больше пространства для содержимого */
       height: 100%;
       display: flex;
       flex-direction: column;
+      touch-action: pan-y; /* Разрешить только вертикальный скролл внутри карточки */
     }
 
     /* Hide scrollbar for card content but keep functionality */

@@ -111,6 +111,7 @@ const QuestionDisplayCard: React.FC<QuestionDisplayCardProps> = ({
                     placeholder="Напишите или надиктуйте свой ответ..."
                     disabled={!isCurrentCard || isCheckingAnswer || speechState.isListening}
                     aria-label={`Ваш ответ на вопрос: ${questionText}`}
+                    style={{ touchAction: 'manipulation' }} // Улучшенное сенсорное управление
                 />
                  {speechState.isSupported && isCurrentCard && (
                     <div className="mt-1.5">
