@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm';
 import { QuestionItem, SpeechRecognitionState } from '../types';
 import { evaluateAnswerWithAPI } from '../services/geminiService';
 import Spoiler from './Spoiler';
-import { MicrophoneIcon, StopIcon, CheckIcon, EyeIcon, EyeSlashIcon } from './icons';
+import { MicrophoneIcon, StopIcon, CheckIcon } from './icons';
 
 interface QuestionDisplayCardProps {
   questionItem: QuestionItem;
