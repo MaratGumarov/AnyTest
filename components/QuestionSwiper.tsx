@@ -3,18 +3,21 @@ import { useSwipeable } from 'react-swipeable';
 import { QuestionItem, SpeechRecognitionState } from '../types';
 import QuestionDisplayCard from './QuestionDisplayCard';
 import useSpeechRecognition from '../hooks/useSpeechRecognition'; // Assuming this path
-import { LoadingSpinner, ArrowRightIcon, ListBulletIcon, SparklesIcon, XCircleIcon } from './icons';
+import { LoadingSpinner, ArrowRightIcon, ArrowLeftIcon, ListBulletIcon, SparklesIcon, XCircleIcon } from './icons';
 
 interface QuestionSwiperProps {
   questions: QuestionItem[];
   startIndex: number;
   onNextQuestion: (currentAnsweredQuestion: QuestionItem) => void;
+  onPreviousQuestion: () => void;
   onUpdateUserAnswer: (questionId: string, answer: string) => void;
   onCheckAnswer: (questionId: string) => void;
   onUpdateQuestionState: (questionId: string, updates: Partial<QuestionItem>) => void;
   onEndSession: () => void;
+  onViewResults: () => void;
   isFetchingMore: boolean;
   hasMoreQuestionsToLoad: boolean;
+  canGoPrevious: boolean;
 }
 
 const SWIPE_THRESHOLD = 50; // pixels
@@ -23,12 +26,15 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
   questions,
   startIndex,
   onNextQuestion,
+  onPreviousQuestion,
   onUpdateUserAnswer,
   onCheckAnswer,
   onUpdateQuestionState,
   onEndSession,
+  onViewResults,
   isFetchingMore,
-  hasMoreQuestionsToLoad
+  hasMoreQuestionsToLoad,
+  canGoPrevious
 }) => {
   const [currentIndex, setCurrentIndex] = useState(startIndex);
   const [cardStyles, setCardStyles] = useState<{ [key: string]: React.CSSProperties }>({});
@@ -57,16 +63,16 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
   const handlers = useSwipeable({
     onSwiping: (eventData) => {
       if(eventData.dir === "Left" || eventData.dir === "Right") { // Only apply transform for horizontal swipes
-        handleSwipe(eventData.deltaX); // Убираем дублирование логики направления
+        handleSwipe(eventData.deltaX);
       }
     },
     onSwiped: (eventData) => {
-      // Reset style after swipe is done, natural position or off-screen if swiped far enough
       if (currentQuestion) {
-        const shouldAdvance = Math.abs(eventData.deltaX) > SWIPE_THRESHOLD && eventData.deltaX < 0;
+        const shouldGoNext = Math.abs(eventData.deltaX) > SWIPE_THRESHOLD && eventData.deltaX < 0; // Свайп влево - следующий
+        const shouldGoPrevious = Math.abs(eventData.deltaX) > SWIPE_THRESHOLD && eventData.deltaX > 0; // Свайп вправо - предыдущий
         
-        if (shouldAdvance) {
-          // Анимация ухода карточки влево
+        if (shouldGoNext) {
+          // Анимация ухода карточки влево (следующий вопрос)
           setCardStyles(prev => ({
             ...prev, 
             [currentQuestion.id]: { 
@@ -76,9 +82,23 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
             }
           }));
           
-          // Переход к следующему вопросу после анимации
           setTimeout(() => {
             onNextQuestion(currentQuestion);
+            setCardStyles(prev => ({...prev, [currentQuestion.id]: {}}));
+          }, 300);
+        } else if (shouldGoPrevious && canGoPrevious) {
+          // Анимация ухода карточки вправо (предыдущий вопрос)
+          setCardStyles(prev => ({
+            ...prev, 
+            [currentQuestion.id]: { 
+              transform: 'translate(-50%, -50%) translateX(100vw) rotate(30deg)',
+              opacity: 0,
+              transition: 'transform 0.3s ease-out, opacity 0.3s ease-out'
+            }
+          }));
+          
+          setTimeout(() => {
+            onPreviousQuestion();
             setCardStyles(prev => ({...prev, [currentQuestion.id]: {}}));
           }, 300);
         } else {
@@ -94,16 +114,10 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
         }
       }
     },
-    onSwipedLeft: () => {
-        // Дополнительная проверка для свайпа влево
-        if (currentQuestion) {
-            onNextQuestion(currentQuestion);
-        }
-    },
     preventScrollOnSwipe: true,
     trackMouse: true,
-    trackTouch: true, // Добавляем для лучшей работы на тачскринах
-    delta: 10, // Увеличиваем чувствительность
+    trackTouch: true,
+    delta: 10,
   });
 
   const handleManualNext = () => {
@@ -154,22 +168,23 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
        {/* Контейнер для карточек */}
        <div className="cards-container">
           {questions.map((q, index) => {
-              if (index < currentIndex) return null; // Don't render past cards
-              // Only render current and maybe one upcoming card for performance, or use a window
-              if (index > currentIndex + 2) return null; 
+              // Показываем текущую карточку и несколько соседних для плавности
+              const isVisible = Math.abs(index - currentIndex) <= 2;
+              if (!isVisible) return null;
 
               const isCurrent = index === currentIndex;
-              const zIndex = questions.length - index; // Top card has highest z-index
+              const zIndex = questions.length - Math.abs(index - currentIndex); // Top card has highest z-index
               let displayStyle: React.CSSProperties = { zIndex };
               
               if (isCurrent) {
                 displayStyle = { ...displayStyle, ...cardStyles[q.id] };
               } else {
-                 // Style for cards in the background stack
+                 // Style for cards in the background stack - both previous and next
+                 const offset = index - currentIndex;
                  displayStyle = {
                     ...displayStyle,
-                    transform: `translate(-50%, -50%) translateY(${(index - currentIndex) * 10}px) scale(${1 - (index - currentIndex) * 0.05})`,
-                    opacity: 1 - (index - currentIndex) * 0.2,
+                    transform: `translate(-50%, -50%) translateY(${offset * 10}px) scale(${1 - Math.abs(offset) * 0.05})`,
+                    opacity: 1 - Math.abs(offset) * 0.2,
                     pointerEvents: 'none', // Non-current cards not interactive
                  };
               }
@@ -192,14 +207,31 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
        </div>
 
         {currentQuestion && (
-            <div className="fixed bottom-4 left-1/2 -translate-x-1/2 flex gap-3 z-30 p-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-full shadow-lg md:absolute md:bottom-8">
-                 <button
+            <div className="fixed bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-30 p-2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-full shadow-lg md:absolute md:bottom-8">
+                <button
                     onClick={onEndSession}
                     title="Завершить сессию и посмотреть результаты"
                     className="p-2 md:p-3 rounded-full bg-red-500 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50 transition-colors"
                 >
-                    <XCircleIcon className="w-5 h-5 md:w-6 md:h-6" />
+                    <XCircleIcon className="w-4 h-4 md:w-5 md:h-5" />
                     <span className="sr-only">Завершить сессию</span>
+                </button>
+                <button
+                    onClick={onViewResults}
+                    title="Посмотреть результаты"
+                    className="p-2 md:p-3 rounded-full bg-green-600 text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition-colors"
+                >
+                    <ListBulletIcon className="w-4 h-4 md:w-5 md:h-5" />
+                    <span className="sr-only">Посмотреть результаты</span>
+                </button>
+                <button
+                    onClick={onPreviousQuestion}
+                    title="Предыдущий вопрос"
+                    className="p-2 md:p-3 rounded-full bg-slate-600 text-white hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={!canGoPrevious}
+                >
+                    <ArrowLeftIcon className="w-4 h-4 md:w-5 md:h-5" />
+                    <span className="sr-only">Предыдущий вопрос</span>
                 </button>
                 <button
                     onClick={handleManualNext}
@@ -207,7 +239,7 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
                     className="p-2 md:p-3 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 transition-colors"
                     disabled={!hasMoreQuestionsToLoad && currentIndex >= questions.length - 1 && !isFetchingMore}
                 >
-                    <ArrowRightIcon className="w-5 h-5 md:w-6 md:h-6" />
+                    <ArrowRightIcon className="w-4 h-4 md:w-5 md:h-5" />
                     <span className="sr-only">Следующий вопрос</span>
                 </button>
             </div>

@@ -110,7 +110,16 @@ const App: React.FC = () => {
 
   const handleNextQuestion = useCallback((currentAnsweredQuestion: QuestionItem) => {
     console.log('[App.tsx] handleNextQuestion. Current answered:', currentAnsweredQuestion.id);
-    setAnsweredQuestions(prev => [...prev, currentAnsweredQuestion]);
+    
+    // Добавляем вопрос в answered только если его там еще нет
+    setAnsweredQuestions(prev => {
+      const exists = prev.find(q => q.id === currentAnsweredQuestion.id);
+      if (!exists) {
+        return [...prev, currentAnsweredQuestion];
+      }
+      // Если уже есть, обновляем его
+      return prev.map(q => q.id === currentAnsweredQuestion.id ? currentAnsweredQuestion : q);
+    });
     
     const nextIndex = currentQuestionIndex + 1;
     setCurrentQuestionIndex(nextIndex);
@@ -126,6 +135,30 @@ const App: React.FC = () => {
        console.log('[App.tsx] Reached end of current questions queue and not fetching.');
     }
   }, [currentQuestionIndex, questionsQueue.length, sessionSettings, fetchQuestionBatch, isFetchingQuestions]);
+
+  const handlePreviousQuestion = useCallback(() => {
+    if (currentQuestionIndex > 0) {
+      const prevIndex = currentQuestionIndex - 1;
+      setCurrentQuestionIndex(prevIndex);
+      console.log('[App.tsx] handlePreviousQuestion. New index:', prevIndex);
+    }
+  }, [currentQuestionIndex]);
+
+  const handleViewResults = useCallback(() => {
+    console.log('[App.tsx] handleViewResults triggered.');
+    const currentQ = questionsQueue[currentQuestionIndex];
+    if (currentQ && (currentQ.userAnswer || currentQ.shortFeedback)) {
+       setAnsweredQuestions(prev => {
+        const exists = prev.find(aq => aq.id === currentQ.id);
+        if (!exists) {
+            console.log('[App.tsx] Adding current active question to answeredQuestions before viewing results.');
+            return [...prev, currentQ];
+        }
+        return prev.map(q => q.id === currentQ.id ? currentQ : q);
+       });
+    }
+    setCurrentScreen(SCREEN_SUMMARY);
+  }, [questionsQueue, currentQuestionIndex]);
   
   const updateUserAnswer = useCallback((questionId: string, answer: string) => {
     // console.log(`[App.tsx] updateUserAnswer for QID: ${questionId}, Answer: ${answer.substring(0,20)}...`);
@@ -192,9 +225,24 @@ const App: React.FC = () => {
     setCurrentScreen(SCREEN_SETUP);
   }, []);
 
+  const handleBackToQuestions = useCallback(() => {
+    console.log('[App.tsx] handleBackToQuestions triggered.');
+    setCurrentScreen(SCREEN_QUESTIONS);
+  }, []);
+
   const currentVisibleQuestions = useMemo(() => {
-    return questionsQueue;
-  }, [questionsQueue]);
+    // Объединяем уже отвеченные вопросы с текущей очередью
+    const allQuestions = [...answeredQuestions];
+    
+    // Добавляем вопросы из очереди, которых еще нет в answeredQuestions
+    questionsQueue.forEach(q => {
+      if (!allQuestions.find(aq => aq.id === q.id)) {
+        allQuestions.push(q);
+      }
+    });
+    
+    return allQuestions;
+  }, [answeredQuestions, questionsQueue]);
 
 
   if (isLoadingInitial) {
@@ -255,18 +303,22 @@ const App: React.FC = () => {
             questions={currentVisibleQuestions}
             startIndex={currentQuestionIndex}
             onNextQuestion={handleNextQuestion}
+            onPreviousQuestion={handlePreviousQuestion}
             onUpdateUserAnswer={updateUserAnswer}
             onCheckAnswer={handleCheckAnswer}
             onUpdateQuestionState={updateQuestionState}
             onEndSession={handleEndSession}
+            onViewResults={handleViewResults}
             isFetchingMore={isFetchingQuestions}
             hasMoreQuestionsToLoad={!isFetchingQuestions && questionsQueue.length > currentQuestionIndex +1} // Simplified
+            canGoPrevious={currentQuestionIndex > 0 || answeredQuestions.length > 0}
           />
         )}
         {currentScreen === SCREEN_SUMMARY && (
           <SummaryScreen
             answeredQuestions={answeredQuestions}
             onStartNewSession={handleStartNewSession}
+            onBackToQuestions={sessionSettings ? handleBackToQuestions : undefined}
             sessionSettings={sessionSettings}
           />
         )}

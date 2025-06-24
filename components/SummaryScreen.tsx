@@ -4,16 +4,17 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { QuestionItem, SessionSettings } from '../types';
 import Spoiler from './Spoiler';
-import { DownloadIcon, HomeIcon, ListBulletIcon, SparklesIcon, ChevronDownIcon, ChevronUpIcon } from './icons';
+import { DownloadIcon, HomeIcon, ListBulletIcon, SparklesIcon, ChevronDownIcon, ChevronUpIcon, ArrowUturnLeftIcon } from './icons';
 import { APP_TITLE } from '../constants';
 
 interface SummaryScreenProps {
   answeredQuestions: QuestionItem[];
   onStartNewSession: () => void;
+  onBackToQuestions?: () => void;
   sessionSettings: SessionSettings | null;
 }
 
-const SummaryScreen: React.FC<SummaryScreenProps> = ({ answeredQuestions, onStartNewSession, sessionSettings }) => {
+const SummaryScreen: React.FC<SummaryScreenProps> = ({ answeredQuestions, onStartNewSession, onBackToQuestions, sessionSettings }) => {
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   // For spoilers within each summary item
   const [spoilerVisibility, setSpoilerVisibility] = useState<Record<string, { correctAnswer?: boolean, detailedFeedback?: boolean }>>({});
@@ -143,6 +144,15 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({ answeredQuestions, onStar
         )}
 
         <div className="mt-8 flex flex-col sm:flex-row gap-4">
+          {onBackToQuestions && (
+            <button
+              onClick={onBackToQuestions}
+              className="w-full sm:w-auto flex-1 flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 dark:focus:ring-offset-slate-800 transition-colors"
+            >
+              <ArrowUturnLeftIcon className="mr-2 h-5 w-5" />
+              Вернуться к вопросам
+            </button>
+          )}
           <button
             onClick={onStartNewSession}
             className="w-full sm:w-auto flex-1 flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-slate-800 transition-colors"
