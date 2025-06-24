@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { QuestionItem, SpeechRecognitionState } from '../types';
 import QuestionDisplayCard from './QuestionDisplayCard';
@@ -20,9 +20,6 @@ interface QuestionSwiperProps {
   canGoPrevious: boolean;
 }
 
-const SWIPE_THRESHOLD = 60;
-const SWIPE_VELOCITY = 0.4;
-
 const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
   questions,
   startIndex,
@@ -35,14 +32,14 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
   onViewResults,
   isFetchingMore,
   hasMoreQuestionsToLoad,
-  canGoPrevious
+  canGoPrevious,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(startIndex);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [swipeOffset, setSwipeOffset] = useState(0);
-  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
-  const speechState = useSpeechRecognition();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const speechRecognition = useSpeechRecognition();
 
+  // Синхронизация с внешним индексом
   useEffect(() => {
     setCurrentIndex(startIndex);
   }, [startIndex]);
@@ -50,288 +47,199 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
   // Автозагрузка новых вопросов
   useEffect(() => {
     if (currentIndex >= questions.length - 2 && hasMoreQuestionsToLoad && !isFetchingMore) {
-      // Загружаем новые вопросы когда остается 2 вопроса
-      const event = new CustomEvent('loadMoreQuestions');
-      window.dispatchEvent(event);
+      window.dispatchEvent(new Event('loadMoreQuestions'));
     }
   }, [currentIndex, questions.length, hasMoreQuestionsToLoad, isFetchingMore]);
 
-  const currentQuestion = questions[currentIndex];
-  const nextQuestion = questions[currentIndex + 1];
-  const prevQuestion = questions[currentIndex - 1];
-
-  const executeTransition = useCallback((direction: 'next' | 'prev') => {
+  const handleNext = useCallback(() => {
     if (isTransitioning) return;
     
+    const currentQuestion = questions[currentIndex];
+    if (!currentQuestion) return;
+
     setIsTransitioning(true);
-    setSwipeDirection(direction === 'next' ? 'left' : 'right');
+    
+    // Переход к следующему вопросу
+    setTimeout(() => {
+      onNextQuestion(currentQuestion);
+      setIsTransitioning(false);
+    }, 300);
+  }, [currentIndex, questions, onNextQuestion, isTransitioning]);
+
+  const handlePrevious = useCallback(() => {
+    if (isTransitioning || !canGoPrevious) return;
+    
+    setIsTransitioning(true);
     
     setTimeout(() => {
-      if (direction === 'next' && currentQuestion) {
-        onNextQuestion(currentQuestion);
-      } else if (direction === 'prev') {
-        onPreviousQuestion();
-      }
-      
+      onPreviousQuestion();
       setIsTransitioning(false);
-      setSwipeOffset(0);
-      setSwipeDirection(null);
     }, 300);
-  }, [isTransitioning, currentQuestion, onNextQuestion, onPreviousQuestion]);
+  }, [onPreviousQuestion, canGoPrevious, isTransitioning]);
 
-  const handlers = useSwipeable({
-    onSwiping: (eventData) => {
-      if (isTransitioning) return;
-      
-      const { deltaX, deltaY } = eventData;
-      
-      // Проверяем что это горизонтальный свайп
-      if (Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
-        const maxOffset = window.innerWidth * 0.8;
-        const limitedOffset = Math.max(-maxOffset, Math.min(maxOffset, deltaX));
-        setSwipeOffset(limitedOffset);
-      }
-    },
-    onSwiped: (eventData) => {
-      if (isTransitioning) return;
-      
-      const { deltaX, velocity } = eventData;
-      const shouldSwipe = Math.abs(deltaX) > SWIPE_THRESHOLD || Math.abs(velocity) > SWIPE_VELOCITY;
-      
-      if (shouldSwipe) {
-        if (deltaX < 0) {
-          // Свайп влево - следующий
-          executeTransition('next');
-        } else if (deltaX > 0 && canGoPrevious) {
-          // Свайп вправо - предыдущий
-          executeTransition('prev');
-        } else {
-          // Возврат в исходное положение
-          setSwipeOffset(0);
-        }
-      } else {
-        // Возврат в исходное положение
-        setSwipeOffset(0);
-      }
-    },
-    preventScrollOnSwipe: false,
+  // Обработка свайпов
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: handleNext,
+    onSwipedRight: handlePrevious,
+    preventScrollOnSwipe: true,
     trackMouse: true,
     trackTouch: true,
-    delta: 8,
+    delta: 50,
   });
 
-  const getCardTransform = (position: 'current' | 'next' | 'prev'): React.CSSProperties => {
-    let baseTransform = 'translate(-50%, -50%)';
-    let opacity = 1;
-    let scale = 1;
-    let zIndex = 10;
-    let filter = 'none';
-    
-    if (isTransitioning && swipeDirection) {
-      if (position === 'current') {
-        if (swipeDirection === 'left') {
-          baseTransform += ' translateX(-100%)';
-          opacity = 0;
-          filter = 'blur(2px)';
-        } else {
-          baseTransform += ' translateX(100%)';
-          opacity = 0.8;
-        }
-      } else if (position === 'next' && swipeDirection === 'left') {
-        baseTransform += ' translateX(0%)';
-        opacity = 1;
-        zIndex = 20;
-      } else if (position === 'prev' && swipeDirection === 'right') {
-        baseTransform += ' translateX(0%)';
-        opacity = 1;
-        zIndex = 20;
-      }
-    } else {
-      // Обычное состояние или во время свайпа
-      if (position === 'current') {
-        if (swipeOffset !== 0) {
-          baseTransform += ` translateX(${swipeOffset}px)`;
-          opacity = 1 - Math.abs(swipeOffset) / (window.innerWidth * 0.6);
-          
-          if (Math.abs(swipeOffset) > 30) {
-            const blurAmount = Math.min(3, Math.abs(swipeOffset) / 80);
-            filter = `blur(${blurAmount}px)`;
-          }
-        }
-        zIndex = 20;
-      } else if (position === 'next') {
-        baseTransform += ' translateX(100%)';
-        opacity = 0.7;
-        scale = 0.95;
-        zIndex = 5;
-      } else if (position === 'prev') {
-        baseTransform += ' translateX(-100%)';
-        opacity = 0.7;
-        scale = 0.95;
-        zIndex = 5;
-      }
-    }
+  const currentQuestion = questions[currentIndex];
 
-    return {
-      transform: `${baseTransform} scale(${scale})`,
-      opacity,
-      zIndex,
-      filter,
-      transition: isTransitioning || swipeOffset === 0 ? 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : 'none',
-    };
-  };
-
-  const handleManualNext = () => {
-    if (!isTransitioning) {
-      executeTransition('next');
-    }
-  };
-
-  const handleManualPrev = () => {
-    if (!isTransitioning && canGoPrevious) {
-      executeTransition('prev');
-    }
-  };
-
-  if (!currentQuestion && !isFetchingMore) {
+  if (!currentQuestion) {
     return (
-      <div className="screen flex flex-col items-center justify-center text-center p-8 min-h-[calc(100vh-200px)]">
-        <SparklesIcon className="w-16 h-16 text-indigo-500 dark:text-indigo-400 mx-auto mb-6" />
-        <h2 className="text-2xl font-semibold text-slate-700 dark:text-slate-200 mb-4">
-            { hasMoreQuestionsToLoad ? "Загружаем еще вопросы..." : "Вопросы закончились!" }
-        </h2>
-        <p className="text-slate-600 dark:text-slate-400 mb-6">
-            { hasMoreQuestionsToLoad ? "Пожалуйста, подождите немного." : "Вы прошли все доступные вопросы для этой сессии."}
-        </p>
-        <button
-          onClick={onEndSession}
-          className="flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-slate-900 transition-colors"
-        >
-          <ListBulletIcon className="mr-2 h-5 w-5" />
-          Посмотреть результаты
-        </button>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <LoadingSpinner className="w-12 h-12 mx-auto mb-4" />
+          <p className="text-slate-600 dark:text-slate-400">Загрузка вопросов...</p>
+        </div>
       </div>
     );
   }
-  
-  if (!currentQuestion && isFetchingMore) {
-     return (
-        <div className="screen flex flex-col items-center justify-center text-center p-8 min-h-[calc(100vh-200px)]">
-            <LoadingSpinner className="w-12 h-12 mb-4" textClassName="text-indigo-500 dark:text-indigo-400" />
-            <p className="text-lg text-slate-600 dark:text-slate-400">Генерируем вопросы для вас...</p>
-        </div>
-     );
-  }
 
   return (
-    <div className="screen flex flex-col flex-grow relative overflow-hidden" {...handlers}>
-        {/* Индикатор загрузки новых вопросов */}
-        {isFetchingMore && (
-             <div className="absolute top-4 right-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-3 rounded-full shadow-lg z-30 border border-slate-200 dark:border-slate-700">
-                <LoadingSpinner className="h-5 w-5" textClassName="text-indigo-500 dark:text-indigo-400"/>
-            </div>
-        )}
-
-        {/* Индикатор прогресса */}
-        <div className="absolute top-4 left-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm px-3 py-2 rounded-full shadow-lg z-30 border border-slate-200 dark:border-slate-700">
+    <div className="w-full max-w-4xl mx-auto">
+      {/* Индикатор прогресса */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-            {currentIndex + 1} / {questions.length}
+            Вопрос {currentIndex + 1} из {questions.length}
+            {isFetchingMore && ' (загружаем ещё...)'}
           </span>
+          <div className="flex items-center space-x-2">
+            {isFetchingMore && <LoadingSpinner className="w-4 h-4" />}
+            <SparklesIcon className="w-4 h-4 text-indigo-500" />
+          </div>
         </div>
-      
-       <div className="cards-container">
-          {/* Предыдущая карточка */}
-          {prevQuestion && canGoPrevious && (
-            <QuestionDisplayCard
-               key={`prev-${prevQuestion.id}`}
-               questionItem={prevQuestion}
-               onUserAnswerChange={onUpdateUserAnswer}
-               onCheckAnswer={onCheckAnswer}
-               onUpdateQuestionState={onUpdateQuestionState}
-               speechState={speechState}
-               startListening={speechState.startListening}
-               stopListening={speechState.stopListening}
-               isCurrentCard={false}
-               cardStyle={getCardTransform('prev')}
-            />
-          )}
-
-          {/* Текущая карточка */}
-          <QuestionDisplayCard
-             key={`current-${currentQuestion.id}`}
-             questionItem={currentQuestion}
-             onUserAnswerChange={onUpdateUserAnswer}
-             onCheckAnswer={onCheckAnswer}
-             onUpdateQuestionState={onUpdateQuestionState}
-             speechState={speechState}
-             startListening={speechState.startListening}
-             stopListening={speechState.stopListening}
-             isCurrentCard={true}
-             cardStyle={getCardTransform('current')}
+        <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+          <div 
+            className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2 rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${((currentIndex + 1) / Math.max(questions.length, 1)) * 100}%` }}
           />
+        </div>
+      </div>
 
-          {/* Следующая карточка */}
-          {nextQuestion && (
-            <QuestionDisplayCard
-               key={`next-${nextQuestion.id}`}
-               questionItem={nextQuestion}
-               onUserAnswerChange={onUpdateUserAnswer}
-               onCheckAnswer={onCheckAnswer}
-               onUpdateQuestionState={onUpdateQuestionState}
-               speechState={speechState}
-               startListening={speechState.startListening}
-               stopListening={speechState.stopListening}
-               isCurrentCard={false}
-               cardStyle={getCardTransform('next')}
-            />
-          )}
-       </div>
-
-        {/* Элегантная панель управления */}
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-30 p-3 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200/50 dark:border-slate-700/50 md:absolute md:bottom-8">
-            <button
-                onClick={onEndSession}
-                title="Завершить сессию"
-                className="p-3 rounded-xl bg-red-500/90 text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400/50 transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isTransitioning}
-            >
-                <XCircleIcon className="w-5 h-5" />
-            </button>
-            
-            <button
-                onClick={onViewResults}
-                title="Посмотреть результаты"
-                className="p-3 rounded-xl bg-green-500/90 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400/50 transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isTransitioning}
-            >
-                <ListBulletIcon className="w-5 h-5" />
-            </button>
-            
-            <button
-                onClick={handleManualPrev}
-                title="Предыдущий вопрос"
-                className="p-3 rounded-xl bg-slate-500/90 text-white hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400/50 transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!canGoPrevious || isTransitioning}
-            >
-                <ArrowLeftIcon className="w-5 h-5" />
-            </button>
-            
-            <button
-                onClick={handleManualNext}
-                title="Следующий вопрос"
-                className="p-3 rounded-xl bg-indigo-500/90 text-white hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400/50 transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isTransitioning}
-            >
-                <ArrowRightIcon className="w-5 h-5" />
-            </button>
+      {/* Контейнер карточек */}
+      <div 
+        {...swipeHandlers}
+        className="relative w-full"
+        style={{ height: 'calc(100vh - 300px)', minHeight: '500px' }}
+      >
+        {/* Текущая карточка */}
+        <div 
+          className={`absolute inset-0 transition-all duration-300 ease-out ${
+            isTransitioning ? 'opacity-90 scale-98' : 'opacity-100 scale-100'
+          }`}
+          style={{ 
+            transform: isTransitioning ? 'translateY(-10px)' : 'translateY(0)',
+          }}
+        >
+          <QuestionDisplayCard
+            questionItem={currentQuestion}
+            onUserAnswerChange={onUpdateUserAnswer}
+            onCheckAnswer={onCheckAnswer}
+            onUpdateQuestionState={onUpdateQuestionState}
+            speechState={speechRecognition}
+            startListening={speechRecognition.startListening}
+            stopListening={speechRecognition.stopListening}
+            isCurrentCard={true}
+            cardStyle={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '100%',
+              maxWidth: '600px',
+            }}
+          />
         </div>
 
-        {/* Подсказка для свайпов на мобильных */}
-        {currentIndex === 0 && (
-          <div className="absolute bottom-32 left-1/2 -translate-x-1/2 bg-black/70 text-white px-4 py-2 rounded-lg text-sm md:hidden animate-pulse">
-            ← Свайп для навигации →
+        {/* Превью следующей карточки (слегка видимая) */}
+        {questions[currentIndex + 1] && (
+          <div 
+            className="absolute inset-0 pointer-events-none opacity-20 scale-95"
+            style={{ 
+              transform: 'translate(-45%, -45%) translateZ(-10px)',
+              filter: 'blur(1px)',
+            }}
+          >
+            <QuestionDisplayCard
+              questionItem={questions[currentIndex + 1]}
+              onUserAnswerChange={() => {}}
+              onCheckAnswer={() => {}}
+              onUpdateQuestionState={() => {}}
+              speechState={{ isSupported: false, isListening: false, transcript: '', error: null }}
+              startListening={() => {}}
+              stopListening={() => {}}
+              isCurrentCard={false}
+              cardStyle={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '100%',
+                maxWidth: '600px',
+              }}
+            />
           </div>
         )}
+      </div>
+
+      {/* Кнопки навигации */}
+      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-20">
+        <div className="flex items-center space-x-3 bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg rounded-2xl p-3 shadow-lg border border-white/20 dark:border-slate-700/50">
+          {/* Предыдущий вопрос */}
+          <button
+            onClick={handlePrevious}
+            disabled={!canGoPrevious || isTransitioning}
+            className="flex items-center justify-center w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 btn-modern"
+            title="Предыдущий вопрос"
+          >
+            <ArrowLeftIcon className="w-5 h-5" />
+          </button>
+
+          {/* Следующий вопрос */}
+          <button
+            onClick={handleNext}
+            disabled={isTransitioning}
+            className="flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-500 text-white hover:bg-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 btn-modern glow-effect"
+            title="Следующий вопрос"
+          >
+            <ArrowRightIcon className="w-5 h-5" />
+          </button>
+
+          {/* Посмотреть результаты */}
+          <button
+            onClick={onViewResults}
+            className="flex items-center justify-center w-12 h-12 rounded-xl bg-purple-500 text-white hover:bg-purple-600 transition-all duration-200 btn-modern"
+            title="Посмотреть результаты"
+          >
+            <ListBulletIcon className="w-5 h-5" />
+          </button>
+
+          {/* Завершить сессию */}
+          <button
+            onClick={onEndSession}
+            className="flex items-center justify-center w-12 h-12 rounded-xl bg-red-500 text-white hover:bg-red-600 transition-all duration-200 btn-modern"
+            title="Завершить сессию"
+          >
+            <XCircleIcon className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Индикатор загрузки новых вопросов */}
+      {isFetchingMore && (
+        <div className="fixed top-4 right-4 z-20">
+          <div className="flex items-center space-x-2 bg-indigo-500 text-white px-4 py-2 rounded-lg shadow-lg">
+            <LoadingSpinner className="w-4 h-4" />
+            <span className="text-sm font-medium">Загружаем новые вопросы...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
