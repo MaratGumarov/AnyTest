@@ -10,6 +10,7 @@ import SetupScreen from './components/SetupScreen';
 import QuestionSwiper from './components/QuestionSwiper';
 import SummaryScreen from './components/SummaryScreen';
 import { generateQuestionsFromAPI, evaluateAnswerWithAPI } from './services/geminiService';
+import { generateUUID } from './utils';
 import { LoadingSpinner } from './components/icons';
 
 const App: React.FC = () => {
@@ -56,7 +57,7 @@ const App: React.FC = () => {
       const generated: GeneratedQuestion[] = await generateQuestionsFromAPI(QUESTION_BATCH_SIZE, settings.difficulty, settings.topic);
       console.log('[App.tsx] fetchQuestionBatch: Questions received from API:', generated.length);
       const newQuestions: QuestionItem[] = generated.map((q) => ({
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         questionText: q.question,
         correctAnswer: q.answer,
         topic: settings.topic,
