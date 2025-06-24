@@ -44,7 +44,7 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
     if (!currentQuestion) return;
 
     const newCardStyles: React.CSSProperties = {
-        transform: `translateX(${deltaX}px) rotate(${deltaX / 20}deg)`,
+        transform: `translate(-50%, -50%) translateX(${deltaX}px) rotate(${deltaX / 20}deg)`,
         opacity: 1 - Math.abs(deltaX) / (window.innerWidth / 2),
     };
     setCardStyles({ [currentQuestion.id]: newCardStyles });
@@ -119,53 +119,55 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
 
 
   return (
-    <div className="screen flex flex-col items-center justify-center flex-grow relative overflow-hidden p-2 md:p-4" {...handlers}>
+    <div className="screen flex flex-col flex-grow relative overflow-hidden" {...handlers}>
         {isFetchingMore && currentIndex > 0 && ( // Show only if not first load
              <div className="absolute top-2 right-2 bg-slate-100 dark:bg-slate-700 p-2 rounded-full shadow-md z-10">
                 <LoadingSpinner className="h-5 w-5" textClassName="text-indigo-500 dark:text-indigo-400"/>
             </div>
         )}
       
-       {/* Render current and potentially next card for smoother visual transition, or just current */}
-      {questions.map((q, index) => {
-          if (index < currentIndex) return null; // Don't render past cards
-          // Only render current and maybe one upcoming card for performance, or use a window
-          if (index > currentIndex + 2) return null; 
+       {/* Контейнер для карточек */}
+       <div className="cards-container">
+          {questions.map((q, index) => {
+              if (index < currentIndex) return null; // Don't render past cards
+              // Only render current and maybe one upcoming card for performance, or use a window
+              if (index > currentIndex + 2) return null; 
 
-          const isCurrent = index === currentIndex;
-          const zIndex = questions.length - index; // Top card has highest z-index
-          let displayStyle: React.CSSProperties = { zIndex };
-          
-          if (isCurrent) {
-            displayStyle = { ...displayStyle, ...cardStyles[q.id] };
-          } else {
-             // Style for cards in the background stack
-             displayStyle = {
-                ...displayStyle,
-                transform: `translateY(${(index - currentIndex) * 10}px) scale(${1 - (index - currentIndex) * 0.05})`,
-                opacity: 1 - (index - currentIndex) * 0.2,
-                pointerEvents: 'none', // Non-current cards not interactive
-             };
-          }
+              const isCurrent = index === currentIndex;
+              const zIndex = questions.length - index; // Top card has highest z-index
+              let displayStyle: React.CSSProperties = { zIndex };
+              
+              if (isCurrent) {
+                displayStyle = { ...displayStyle, ...cardStyles[q.id] };
+              } else {
+                 // Style for cards in the background stack
+                 displayStyle = {
+                    ...displayStyle,
+                    transform: `translate(-50%, -50%) translateY(${(index - currentIndex) * 10}px) scale(${1 - (index - currentIndex) * 0.05})`,
+                    opacity: 1 - (index - currentIndex) * 0.2,
+                    pointerEvents: 'none', // Non-current cards not interactive
+                 };
+              }
 
-          return (
-             <QuestionDisplayCard
-                key={q.id}
-                questionItem={q}
-                onUserAnswerChange={onUpdateUserAnswer}
-                onCheckAnswer={onCheckAnswer}
-                onUpdateQuestionState={onUpdateQuestionState}
-                speechState={speechState}
-                startListening={speechState.startListening}
-                stopListening={speechState.stopListening}
-                isCurrentCard={isCurrent}
-                cardStyle={displayStyle}
-            />
-          );
-      })}
+              return (
+                 <QuestionDisplayCard
+                    key={q.id}
+                    questionItem={q}
+                    onUserAnswerChange={onUpdateUserAnswer}
+                    onCheckAnswer={onCheckAnswer}
+                    onUpdateQuestionState={onUpdateQuestionState}
+                    speechState={speechState}
+                    startListening={speechState.startListening}
+                    stopListening={speechState.stopListening}
+                    isCurrentCard={isCurrent}
+                    cardStyle={displayStyle}
+                />
+              );
+          })}
+       </div>
 
         {currentQuestion && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-4 z-10 p-2 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-full shadow-lg">
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-4 z-20 p-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full shadow-lg">
                  <button
                     onClick={onEndSession}
                     title="Завершить сессию и посмотреть результаты"

@@ -70,29 +70,52 @@
     .swipe-card {
       position: absolute;
       width: calc(100% - 2rem); /* Full width with padding */
-      max-width: 400px; /* Max width for cards */
+      max-width: 600px; /* Увеличенная максимальная ширина */
       height: auto;
-      min-height: 400px; /* Minimum height */
+      min-height: 500px; /* Увеличенная минимальная высота */
+      max-height: calc(100vh - 200px); /* Максимальная высота относительно экрана */
       will-change: transform;
       transition: transform 0.3s ease-out, opacity 0.3s ease-out;
       cursor: grab;
       touch-action: pan-y; /* Allow vertical scroll on card content while enabling horizontal pan for swipe */
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%); /* Центрирование карточки */
     }
     .swipe-card:active {
       cursor: grabbing;
     }
     .swipe-card-content {
       overflow-y: auto; /* Allow scrolling within the card */
-      max-height: 70vh; /* Limit card height to allow other UI elements */
+      max-height: calc(100vh - 250px); /* Больше пространства для содержимого */
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     /* Hide scrollbar for card content but keep functionality */
     .swipe-card-content::-webkit-scrollbar {
-        display: none;
+        width: 4px;
     }
-    .swipe-card-content {
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
+    .swipe-card-content::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .swipe-card-content::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 2px;
+    }
+    .swipe-card-content::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+    /* Контейнер для карточек */
+    .cards-container {
+      position: relative;
+      width: 100%;
+      height: calc(100vh - 200px); /* Высота контейнера */
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
 
