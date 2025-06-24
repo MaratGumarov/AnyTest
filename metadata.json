@@ -1,0 +1,5 @@
+{
+  "name": "AI Interview Coach",
+  "description": "An AI-powered web service to help users prepare for interviews on various topics. Users can practice answers with text or voice and receive AI feedback through a swipeable card interface.",
+  "requestFramePermissions": ["microphone"]
+}
