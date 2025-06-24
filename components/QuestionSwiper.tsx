@@ -36,7 +36,6 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
 }) => {
   const [currentIndex, setCurrentIndex] = useState(startIndex);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
   const speechRecognition = useSpeechRecognition();
 
   // Синхронизация с внешним индексом
@@ -101,7 +100,7 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
+    <div className="w-full max-w-4xl mx-auto px-4">
       {/* Индикатор прогресса */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
@@ -125,17 +124,14 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
       {/* Контейнер карточек */}
       <div 
         {...swipeHandlers}
-        className="relative w-full"
+        className="relative w-full flex items-center justify-center"
         style={{ height: 'calc(100vh - 300px)', minHeight: '500px' }}
       >
-        {/* Текущая карточка */}
+        {/* Единственная центрированная карточка */}
         <div 
-          className={`absolute inset-0 transition-all duration-300 ease-out ${
-            isTransitioning ? 'opacity-90 scale-98' : 'opacity-100 scale-100'
+          className={`w-full max-w-2xl transition-all duration-300 ease-out ${
+            isTransitioning ? 'opacity-90 scale-95' : 'opacity-100 scale-100'
           }`}
-          style={{ 
-            transform: isTransitioning ? 'translateY(-10px)' : 'translateY(0)',
-          }}
         >
           <QuestionDisplayCard
             questionItem={currentQuestion}
@@ -146,46 +142,9 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
             startListening={speechRecognition.startListening}
             stopListening={speechRecognition.stopListening}
             isCurrentCard={true}
-            cardStyle={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '100%',
-              maxWidth: '600px',
-            }}
+            cardStyle={{}}
           />
         </div>
-
-        {/* Превью следующей карточки (слегка видимая) */}
-        {questions[currentIndex + 1] && (
-          <div 
-            className="absolute inset-0 pointer-events-none opacity-20 scale-95"
-            style={{ 
-              transform: 'translate(-45%, -45%) translateZ(-10px)',
-              filter: 'blur(1px)',
-            }}
-          >
-            <QuestionDisplayCard
-              questionItem={questions[currentIndex + 1]}
-              onUserAnswerChange={() => {}}
-              onCheckAnswer={() => {}}
-              onUpdateQuestionState={() => {}}
-              speechState={{ isSupported: false, isListening: false, transcript: '', error: null }}
-              startListening={() => {}}
-              stopListening={() => {}}
-              isCurrentCard={false}
-              cardStyle={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '100%',
-                maxWidth: '600px',
-              }}
-            />
-          </div>
-        )}
       </div>
 
       {/* Кнопки навигации */}

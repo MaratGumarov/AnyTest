@@ -28,7 +28,7 @@ function App() {
         const newQuestions = await generateQuestions(config);
         if (newQuestions.length > 0) {
           setQuestions(prev => [...prev, ...newQuestions]);
-        } else {
+      } else {
           setHasMoreQuestionsToLoad(false);
         }
       } catch (error) {
@@ -149,7 +149,7 @@ function App() {
           <p className="text-slate-600 dark:text-slate-400">
             Подготовка к техническим собеседованиям с ИИ
           </p>
-        </header>
+      </header>
 
         {error && (
           <div className="mb-6 p-4 bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -159,9 +159,9 @@ function App() {
               className="mt-2 text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
             >
               Закрыть
-            </button>
-          </div>
-        )}
+                    </button>
+        </div>
+      )}
 
         {currentScreen === 'config' && (
           <ConfigScreen onStartInterview={handleStartInterview} />
