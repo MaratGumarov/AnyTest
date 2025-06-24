@@ -1,6 +1,7 @@
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { Difficulty, GeneratedQuestion, FeedbackResponse } from '../types';
 import { GEMINI_MODEL_TEXT, QUESTION_BATCH_SIZE } from "../constants"; // QUESTION_BATCH_SIZE used as default
+import { getMockQuestions } from './mockData';
 
 const apiKey = import.meta.env.VITE_API_KEY || "";
 
@@ -32,6 +33,12 @@ const parseJsonFromText = <T,>(text: string, context?: string): T | null => {
 };
 
 export const generateQuestionsFromAPI = async (batchSize: number, difficulty: Difficulty, topic: string): Promise<GeneratedQuestion[]> => {
+  // Для темы Java используем предзагруженные вопросы для быстрого тестирования
+  if (topic.toLowerCase().includes('java')) {
+    console.log('Используем предзагруженные вопросы для Java');
+    return getMockQuestions(difficulty, batchSize);
+  }
+
   const difficultyRussian = {
     [Difficulty.JUNIOR]: 'Junior (начальный)',
     [Difficulty.MIDDLE]: 'Middle (средний)',
@@ -70,7 +77,7 @@ export const generateQuestionsFromAPI = async (batchSize: number, difficulty: Di
       }
     });
     
-    const parsedData = parseJsonFromText<GeneratedQuestion[]>(response.text, 'generateQuestions');
+    const parsedData = parseJsonFromText<GeneratedQuestion[]>(response.text || '', 'generateQuestions');
 
     if (!parsedData || !Array.isArray(parsedData) ) {
       console.error("Получены некорректные данные от API при генерации вопросов (не массив):", parsedData);
@@ -142,7 +149,7 @@ export const evaluateAnswerWithAPI = async (questionText: string, correctAnswer:
       }
     });
     
-    const parsedData = parseJsonFromText<FeedbackResponse>(response.text, 'evaluateAnswer');
+    const parsedData = parseJsonFromText<FeedbackResponse>(response.text || '', 'evaluateAnswer');
 
     if (!parsedData || typeof parsedData.shortFeedback !== 'string' || typeof parsedData.detailedFeedback !== 'string') {
         console.error("Получены некорректные данные от API при оценке ответа (неверная структура):", parsedData);

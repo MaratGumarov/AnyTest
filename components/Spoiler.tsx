@@ -18,9 +18,9 @@ const Spoiler: React.FC<SpoilerProps> = ({
   isOpen, 
   onToggle,
   className = "border border-slate-300 dark:border-slate-700 rounded-lg shadow-sm",
-  titleClassName = "font-medium text-slate-700 dark:text-slate-300",
-  contentClassName = "p-4 border-t border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-b-lg",
-  iconClassName = "w-5 h-5 text-slate-500 dark:text-slate-400"
+  titleClassName = "font-medium text-slate-700 dark:text-slate-300 text-xs md:text-sm",
+  contentClassName = "p-2 md:p-3 border-t border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-b-lg",
+  iconClassName = "w-4 h-4 md:w-5 md:h-5 text-slate-500 dark:text-slate-400"
 }) => {
   const uniqueId = React.useId();
   return (

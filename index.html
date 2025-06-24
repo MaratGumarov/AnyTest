@@ -122,18 +122,29 @@
     /* Адаптивные стили для мобильных устройств */
     @media (max-width: 768px) {
       .swipe-card {
-        max-width: calc(100vw - 4rem); /* Меньшая ширина на мобильных */
-        min-height: 400px; /* Меньшая минимальная высота */
-        max-height: calc(100vh - 280px); /* Больше места для кнопок */
+        width: calc(100vw - 2rem); /* Меньшие отступы */
+        max-width: calc(100vw - 2rem);
+        min-height: 350px; /* Еще меньше минимальная высота */
+        max-height: calc(100vh - 200px); /* Больше места для содержимого */
       }
       
       .swipe-card-content {
-        max-height: calc(100vh - 320px); /* Адаптивная высота содержимого */
+        max-height: calc(100vh - 240px); /* Больше места для скролла */
+        padding: 0.75rem; /* Уменьшенные отступы */
       }
       
       .cards-container {
-        height: calc(100vh - 160px); /* Меньшая высота контейнера */
-        padding-bottom: 120px; /* Больше места для кнопок */
+        height: calc(100vh - 140px); /* Оптимизированная высота */
+        padding-bottom: 100px; /* Место для кнопок */
+      }
+      
+      /* Улучшенный скроллбар на мобильных */
+      .swipe-card-content::-webkit-scrollbar {
+        width: 6px; /* Чуть шире для лучшего взаимодействия */
+      }
+      .swipe-card-content::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.4); /* Более заметный */
+        border-radius: 3px;
       }
     }
 

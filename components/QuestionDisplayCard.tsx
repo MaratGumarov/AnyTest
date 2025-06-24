@@ -91,20 +91,20 @@ const QuestionDisplayCard: React.FC<QuestionDisplayCardProps> = ({
         style={cardStyle}
         aria-labelledby={`question-title-${id}`}
     >
-        <div className="swipe-card-content p-5 md:p-6 flex-grow flex flex-col">
-            <h3 id={`question-title-${id}`} className="text-xl md:text-2xl font-semibold text-slate-800 dark:text-slate-100 mb-4">
+        <div className="swipe-card-content p-3 md:p-5 flex-grow flex flex-col">
+            <h3 id={`question-title-${id}`} className="text-lg md:text-xl font-semibold text-slate-800 dark:text-slate-100 mb-2 md:mb-3">
                 {questionText}
             </h3>
 
-            <div className="flex-grow space-y-4 mb-4">
+            <div className="flex-grow space-y-3 mb-3">
                 <div>
                 <label htmlFor={`userAnswer-${id}`} className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                     Ваш ответ:
                 </label>
                 <textarea
                     id={`userAnswer-${id}`}
-                    rows={6}
-                    className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 disabled:opacity-70"
+                    rows={4}
+                    className="w-full p-2 md:p-3 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-200 disabled:opacity-70 resize-none"
                     value={localUserAnswer}
                     onChange={(e) => setLocalUserAnswer(e.target.value)}
                     onBlur={handleAnswerBlur} // Update on blur
@@ -113,12 +113,12 @@ const QuestionDisplayCard: React.FC<QuestionDisplayCardProps> = ({
                     aria-label={`Ваш ответ на вопрос: ${questionText}`}
                 />
                  {speechState.isSupported && isCurrentCard && (
-                    <div className="mt-2">
+                    <div className="mt-1.5">
                          <button
                             type="button"
                             onClick={handleRecordButtonClick}
                             disabled={!isCurrentCard || isCheckingAnswer}
-                            className={`w-full flex items-center justify-center px-4 py-2 border text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-150 ${
+                            className={`w-full flex items-center justify-center px-3 py-1.5 md:px-4 md:py-2 border text-xs md:text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-150 ${
                                 speechState.isListening 
                                 ? 'bg-red-500 hover:bg-red-600 text-white focus:ring-red-400' 
                                 : 'bg-sky-500 hover:bg-sky-600 text-white focus:ring-sky-400 dark:bg-sky-600 dark:hover:bg-sky-700'
@@ -139,30 +139,30 @@ const QuestionDisplayCard: React.FC<QuestionDisplayCardProps> = ({
                     isOpen={isCorrectAnswerVisible}
                     onToggle={handleToggleCorrectAnswer}
                 >
-                <div className="prose prose-sm dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 p-2 bg-slate-50 dark:bg-slate-700/50 rounded whitespace-pre-wrap">
+                <div className="prose prose-xs md:prose-sm dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 p-2 bg-slate-50 dark:bg-slate-700/50 rounded whitespace-pre-wrap text-xs md:text-sm">
                     {questionItem.correctAnswer}
                 </div>
                 </Spoiler>
             </div>
             
-            <div className="mt-auto space-y-4"> {/* Buttons and feedback at the bottom */}
+            <div className="mt-auto space-y-2 md:space-y-3"> {/* Buttons and feedback at the bottom */}
                 <button
                     type="button"
                     onClick={() => { if(isCurrentCard) onCheckAnswer(id);}}
                     disabled={!isCurrentCard || !canCheckAnswer || speechState.isListening}
-                    className="w-full flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 dark:focus:ring-offset-slate-800 disabled:bg-green-300 dark:disabled:bg-green-700 disabled:cursor-not-allowed transition-colors duration-150"
+                    className="w-full flex items-center justify-center px-4 py-2 md:px-6 md:py-2.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 dark:focus:ring-offset-slate-800 disabled:bg-green-300 dark:disabled:bg-green-700 disabled:cursor-not-allowed transition-colors duration-150"
                 >
                     {isCheckingAnswer ? <LoadingSpinner className="mr-2" /> : <CheckCircleIcon className="mr-2 h-5 w-5" />}
                     {isCheckingAnswer ? 'Проверка...' : 'Проверить ответ'}
                 </button>
 
                 {shortFeedback && (
-                <div className="p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700/50 rounded-md">
-                    <h4 className="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-1 flex items-center">
-                        <InformationCircleIcon className="w-5 h-5 mr-2"/>
+                <div className="p-2 md:p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700/50 rounded-md">
+                    <h4 className="text-xs md:text-sm font-semibold text-blue-700 dark:text-blue-300 mb-1 flex items-center">
+                        <InformationCircleIcon className="w-4 h-4 md:w-5 md:h-5 mr-1 md:mr-2"/>
                         Краткая обратная связь:
                     </h4>
-                    <div className="prose prose-sm max-w-none text-blue-600 dark:text-blue-200">
+                    <div className="prose prose-xs md:prose-sm max-w-none text-blue-600 dark:text-blue-200 text-xs md:text-sm">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{shortFeedback}</ReactMarkdown>
                     </div>
                     {detailedFeedback && (
@@ -178,9 +178,9 @@ const QuestionDisplayCard: React.FC<QuestionDisplayCardProps> = ({
                 )}
 
                 {isDetailedFeedbackVisible && detailedFeedback && (
-                <div className="p-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600/50 rounded-md">
-                    <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Подробная обратная связь:</h4>
-                    <div className="prose prose-sm dark:prose-invert max-w-none text-slate-600 dark:text-slate-300">
+                <div className="p-2 md:p-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600/50 rounded-md">
+                    <h4 className="text-xs md:text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Подробная обратная связь:</h4>
+                    <div className="prose prose-xs md:prose-sm dark:prose-invert max-w-none text-slate-600 dark:text-slate-300 text-xs md:text-sm">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{detailedFeedback}</ReactMarkdown>
                     </div>
                 </div>
