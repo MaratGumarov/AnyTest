@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { QuestionItem, SpeechRecognitionState } from '../types';
 import QuestionDisplayCard from './QuestionDisplayCard';
 import useSpeechRecognition from '../hooks/useSpeechRecognition';
@@ -26,6 +27,7 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
   isFetchingMore,
   hasMoreQuestionsToLoad,
 }) => {
+  const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(startIndex);
   const speechRecognition = useSpeechRecognition();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -94,7 +96,7 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <LoadingSpinner className="w-12 h-12 mx-auto mb-4" />
-          <p className="text-slate-600 dark:text-slate-400">Загрузка вопросов...</p>
+          <p className="text-slate-600 dark:text-slate-400">{t('questions.loadingQuestions')}</p>
         </div>
       </div>
     );
@@ -102,12 +104,12 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
 
   return (
     <div className="w-full h-screen flex flex-col">
-      {/* Индикатор прогресса */}
+      {/* Progress indicator */}
       <div className="flex-shrink-0 px-4 py-3 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-            Вопрос {currentIndex + 1} из {questions.length}
-            {isFetchingMore && ' (загружаем ещё...)'}
+            {t('questions.questionProgress', { current: currentIndex + 1, total: questions.length })}
+            {isFetchingMore && ` (${t('questions.loadingMore')})`}
           </span>
           <div className="flex items-center space-x-2">
             {isFetchingMore && <LoadingSpinner className="w-4 h-4" />}
@@ -121,7 +123,7 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
         </div>
       </div>
 
-      {/* Контейнер с горизонтальным snap-скроллом */}
+      {/* Container with horizontal snap scroll */}
       <div 
         ref={containerRef}
         className="flex-1 overflow-x-auto overflow-y-hidden snap-x-container"
@@ -165,7 +167,7 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
             </div>
           ))}
           
-          {/* Индикатор загрузки новых вопросов */}
+          {/* Loading indicator for new questions */}
           {isFetchingMore && (
             <div 
               className="snap-card flex items-center justify-center"
@@ -178,14 +180,14 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
             >
               <div className="text-center">
                 <LoadingSpinner className="w-8 h-8 mx-auto mb-4" />
-                <p className="text-slate-600 dark:text-slate-400">Загружаем новые вопросы...</p>
+                <p className="text-slate-600 dark:text-slate-400">{t('questions.loadingNewQuestions')}</p>
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Плавающая кнопка результатов */}
+      {/* Floating results button */}
       <div className="fixed bottom-6 right-6 z-50">
         <Button
           variant="primary"
@@ -193,7 +195,7 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
           onClick={onViewResults}
           leftIcon={<ListBulletIcon className="w-5 h-5" />}
           className="w-14 h-14 p-0 rounded-full shadow-lg hover:shadow-xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 dark:from-violet-500 dark:to-purple-600 dark:hover:from-violet-600 dark:hover:to-purple-700 border-0 transform hover:scale-105 transition-all duration-200"
-          title="Посмотреть результаты"
+          title={t('questions.viewResults')}
         />
       </div>
     </div>

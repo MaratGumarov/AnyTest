@@ -25,7 +25,7 @@ export const PREDEFINED_TOPICS = [
   { value: CUSTOM_TOPIC_VALUE, label: 'Другая тема (указать свою)...' }
 ];
 
-export const DEFAULT_TOPIC_PREDEFINED = PREDEFINED_TOPICS[0].value;
+export const DEFAULT_TOPIC_PREDEFINED = 'frontend';
 
 // Screen constants
 export const SCREEN_SETUP = 'setup';

@@ -1,0 +1,103 @@
+{
+  "app": {
+    "title": "AI Interview Coach",
+    "subtitle": "Interview preparation trainer",
+    "poweredBy": "Powered by Gemini API"
+  },
+  "navigation": {
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "results": "Results",
+    "newSession": "New Session"
+  },
+  "setup": {
+    "title": "Setup Your Session",
+    "description": "Choose a topic and difficulty to start your preparation",
+    "topicLabel": "Question Topic",
+    "difficultyLabel": "Difficulty Level",
+    "customTopicLabel": "Specify Your Topic",
+    "customTopicPlaceholder": "e.g., Medieval History",
+    "startButton": "Start Session",
+    "errors": {
+      "topicRequired": "Please enter a name for your custom topic.",
+      "topicNotSelected": "No topic selected. Please choose or specify a topic."
+    }
+  },
+  "questions": {
+    "loading": "Generating questions for you...",
+    "loadingSubtext": "This may take a few seconds",
+    "loadingQuestions": "Loading questions...",
+    "loadingMore": "loading more...",
+    "loadingNewQuestions": "Loading new questions...",
+    "questionProgress": "Question {{current}} of {{total}}",
+    "viewResults": "View results",
+    "yourAnswer": "Your answer:",
+    "answerPlaceholder": "Enter your answer here...",
+    "checkAnswer": "Check Answer",
+    "checking": "Checking answer...",
+    "correctAnswer": "Correct answer:",
+    "shortFeedback": "Brief assessment:",
+    "detailedFeedback": "Detailed feedback",
+    "showAnswer": "Answer",
+    "speechRecognition": {
+      "start": "Start voice input",
+      "stop": "Stop recording",
+      "notSupported": "Speech recognition is not supported in your browser"
+    }
+  },
+  "results": {
+    "title": "Session Results",
+    "topic": "Topic",
+    "difficulty": "Difficulty",
+    "noAnswers": "You didn't answer any questions in this session.",
+    "tryAgain": "Try taking the session again!",
+    "questionNumber": "Question",
+    "fullQuestion": "Full question:",
+    "yourAnswer": "Your answer:",
+    "noAnswerGiven": "No answer was given.",
+    "correctAnswer": "Reference answer",
+    "shortFeedback": "Brief feedback:",
+    "detailedFeedback": "Detailed feedback",
+    "backToQuestions": "Back to questions",
+    "newSession": "Start new session",
+    "exportResults": "Export results",
+    "noDataToExport": "No data to export."
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "tooltip": "Current theme: {{theme}}. Click to switch"
+  },
+  "language": {
+    "tooltip": "Current language: {{language}}. Click to switch"
+  },
+  "topics": {
+    "frontend": "Frontend Development",
+    "backend": "Backend Development",
+    "fullstack": "Fullstack Development",
+    "devops": "DevOps",
+    "mobile": "Mobile Development",
+    "data_science": "Data Science",
+    "machine_learning": "Machine Learning",
+    "product_management": "Product Management",
+    "design": "UI/UX Design",
+    "qa": "Quality Assurance",
+    "custom": "Custom Topic"
+  },
+  "difficulties": {
+    "junior": "Junior",
+    "middle": "Middle",
+    "senior": "Senior"
+  },
+  "common": {
+    "close": "Close",
+    "error": "Error",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save"
+  }
+} 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { QuestionItem, SpeechRecognitionState } from '../types';
@@ -30,6 +31,7 @@ const QuestionDisplayCard: React.FC<QuestionDisplayCardProps> = ({
   isCurrentCard,
   cardStyle,
 }) => {
+  const { t } = useTranslation();
   const [localAnswer, setLocalAnswer] = useState(questionItem.userAnswer);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -71,10 +73,10 @@ const QuestionDisplayCard: React.FC<QuestionDisplayCardProps> = ({
         isCheckingAnswer: false,
       });
     } catch (error) {
-      console.error('Ошибка при проверке ответа:', error);
+      console.error('Error checking answer:', error);
       onUpdateQuestionState(questionItem.id, {
-        shortFeedback: 'Ошибка при проверке ответа',
-        detailedFeedback: 'Произошла ошибка при получении обратной связи. Попробуйте еще раз.',
+        shortFeedback: t('common.error'),
+        detailedFeedback: t('common.retry'),
         isCheckingAnswer: false,
       });
     }
@@ -99,7 +101,7 @@ const QuestionDisplayCard: React.FC<QuestionDisplayCardProps> = ({
       style={cardStyle}
     >
       <div className="flex flex-col p-4 md:p-6 min-h-full">
-        {/* Заголовок с темой */}
+        {/* Header with topic */}
         <div className="flex items-center justify-between mb-4">
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200 glass-effect">
             {questionItem.topic}
@@ -112,43 +114,43 @@ const QuestionDisplayCard: React.FC<QuestionDisplayCardProps> = ({
             leftIcon={<EyeIcon className="w-3 h-3" />}
             className="text-xs"
           >
-            Ответ
+            {t('questions.showAnswer')}
           </Button>
         </div>
 
-        {/* Вопрос */}
+        {/* Question */}
         <div className="mb-6">
           <h2 className="text-lg md:text-xl font-semibold text-slate-900 dark:text-slate-200 leading-relaxed text-balance">
             {questionItem.questionText}
           </h2>
         </div>
 
-        {/* Правильный ответ */}
+        {/* Correct answer */}
         {questionItem.isCorrectAnswerVisible && (
                   <Card variant="glass" padding="sm" className="mb-4 animate-fade-in-up bg-emerald-50 dark:bg-gradient-to-r dark:from-emerald-500/20 dark:to-teal-500/20 border-emerald-200 dark:border-emerald-400/30">
-          <h3 className="font-medium text-emerald-800 dark:text-emerald-300 mb-2 text-sm">✨ Правильный ответ:</h3>
+          <h3 className="font-medium text-emerald-800 dark:text-emerald-300 mb-2 text-sm">✨ {t('questions.correctAnswer')}</h3>
           <p className="text-emerald-700 dark:text-emerald-100 text-sm leading-relaxed whitespace-pre-wrap">
               {questionItem.correctAnswer}
             </p>
           </Card>
         )}
 
-        {/* Поле для ответа */}
+        {/* Answer field */}
         <div className="flex-grow flex flex-col">
           <div className="relative mb-4">
             <Textarea
               ref={textareaRef}
               id={`answer-${questionItem.id}`}
-              label="Ваш ответ:"
+              label={t('questions.yourAnswer')}
               value={localAnswer}
               onChange={handleAnswerChange}
-              placeholder="Введите ваш ответ здесь..."
+              placeholder={t('questions.answerPlaceholder')}
               rows={4}
               variant="modern"
               disabled={questionItem.isCheckingAnswer}
             />
             
-            {/* Кнопка голосового ввода */}
+            {/* Voice input button */}
             {speechState.isSupported && isCurrentCard && (
               <button
                 onClick={speechState.isListening ? stopListening : startListening}
@@ -157,7 +159,7 @@ const QuestionDisplayCard: React.FC<QuestionDisplayCardProps> = ({
                     ? 'bg-red-500 text-white hover:bg-red-600 glow-effect'
                     : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600'
                 }`}
-                title={speechState.isListening ? 'Остановить запись' : 'Начать голосовой ввод'}
+                title={speechState.isListening ? t('questions.speechRecognition.stop') : t('questions.speechRecognition.start')}
                 disabled={questionItem.isCheckingAnswer}
               >
                 {speechState.isListening ? (
@@ -175,7 +177,7 @@ const QuestionDisplayCard: React.FC<QuestionDisplayCardProps> = ({
             </p>
           )}
 
-          {/* Кнопка проверки ответа */}
+          {/* Check answer button */}
           <Button
             onClick={handleCheckAnswer}
             disabled={!localAnswer.trim() || questionItem.isCheckingAnswer}
@@ -186,14 +188,14 @@ const QuestionDisplayCard: React.FC<QuestionDisplayCardProps> = ({
             leftIcon={!questionItem.isCheckingAnswer ? <CheckIcon className="w-4 h-4" /> : undefined}
             className="mb-4"
           >
-            {questionItem.isCheckingAnswer ? 'Проверяем ответ...' : 'Проверить ответ'}
+            {questionItem.isCheckingAnswer ? t('questions.checking') : t('questions.checkAnswer')}
           </Button>
 
-          {/* Обратная связь */}
+          {/* Feedback */}
           {questionItem.shortFeedback && (
             <div className="space-y-4 animate-fade-in-up">
                         <Card variant="glass" padding="md" className="bg-sky-50 dark:bg-gradient-to-r dark:from-sky-500/20 dark:to-cyan-500/20 border-sky-200 dark:border-sky-400/30">
-            <h3 className="font-medium text-sky-900 dark:text-sky-300 mb-2">💡 Краткая оценка:</h3>
+            <h3 className="font-medium text-sky-900 dark:text-sky-300 mb-2">💡 {t('questions.shortFeedback')}</h3>
             <p className="text-sky-800 dark:text-sky-100 text-sm">{questionItem.shortFeedback}</p>
               </Card>
 
@@ -201,7 +203,7 @@ const QuestionDisplayCard: React.FC<QuestionDisplayCardProps> = ({
                 <Spoiler
                   isOpen={questionItem.isDetailedFeedbackVisible}
                   onToggle={toggleDetailedFeedbackVisibility}
-                  title="Подробная обратная связь"
+                  title={t('questions.detailedFeedback')}
                   className="glass-effect"
                 >
                   <div className="prose prose-sm dark:prose-invert max-w-none custom-scrollbar">

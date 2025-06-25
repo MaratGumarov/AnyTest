@@ -3,6 +3,7 @@ import { Difficulty, GeneratedQuestion, FeedbackResponse, InterviewConfig } from
 import { GEMINI_MODEL_TEXT, QUESTION_BATCH_SIZE } from "../constants"; // QUESTION_BATCH_SIZE used as default
 import { getMockQuestions } from './mockData';
 import { generateUUID } from '../utils';
+import i18n from '../src/i18n/index';
 
 const apiKey = import.meta.env.VITE_API_KEY || "";
 
@@ -33,21 +34,43 @@ const parseJsonFromText = <T,>(text: string, context?: string): T | null => {
   }
 };
 
-export const generateQuestionsFromAPI = async (batchSize: number, difficulty: Difficulty, topic: string): Promise<GeneratedQuestion[]> => {
-  // Для темы Java используем предзагруженные вопросы для быстрого тестирования
-  if (topic.toLowerCase().includes('java')) {
-    console.log('Используем предзагруженные вопросы для Java');
-    return getMockQuestions(difficulty, batchSize);
-  }
+const getLanguagePrompts = (language: string) => {
+  if (language === 'en') {
+    return {
+      difficultyMap: {
+        [Difficulty.JUNIOR]: 'Junior (beginner)',
+        [Difficulty.MIDDLE]: 'Middle (intermediate)',
+        [Difficulty.SENIOR]: 'Senior (advanced)',
+      },
+      promptTemplate: (batchSize: number, topic: string, difficultyText: string) => `
+Generate ${batchSize} UNIQUE interview questions for the topic "${topic}" at "${difficultyText}" level.
+Each question should be meaningful and relevant to the topic and difficulty level.
+Avoid repeating questions that might have been generated in previous requests for the same topic.
 
-  const difficultyRussian = {
-    [Difficulty.JUNIOR]: 'Junior (начальный)',
-    [Difficulty.MIDDLE]: 'Middle (средний)',
-    [Difficulty.SENIOR]: 'Senior (продвинутый)',
-  };
+For each question provide:
+1. Question text in English (key "question").
+2. Brief and correct reference answer to the question in English (key "answer"). The answer should be sufficient to check understanding, but not overly detailed.
 
-  const prompt = `
-Сгенерируй ${batchSize} УНИКАЛЬНЫХ вопросов для собеседования по теме "${topic}" уровня "${difficultyRussian[difficulty]}".
+Return the response STRICTLY as a JSON array of objects. Each object should contain only "question" and "answer" keys.
+
+Example of one object in the array:
+{
+  "question": "What is JVM and why is it needed?",
+  "answer": "JVM (Java Virtual Machine) is a virtual machine that executes Java bytecode. It provides platform independence for Java applications, allowing compiled Java code to run on any system where JVM is installed."
+}
+Make sure the entire response is a valid JSON array. Do not add any text before or after the JSON array.
+If for some reason you cannot generate ${batchSize} questions (e.g., the topic is too narrow for that many at the given difficulty level), generate as many as you can, but at least one if possible.
+`
+    };
+  } else {
+    return {
+      difficultyMap: {
+        [Difficulty.JUNIOR]: 'Junior (начальный)',
+        [Difficulty.MIDDLE]: 'Middle (средний)',
+        [Difficulty.SENIOR]: 'Senior (продвинутый)',
+      },
+      promptTemplate: (batchSize: number, topic: string, difficultyText: string) => `
+Сгенерируй ${batchSize} УНИКАЛЬНЫХ вопросов для собеседования по теме "${topic}" уровня "${difficultyText}".
 Каждый вопрос должен быть осмысленным и релевантным теме и уровню сложности.
 Избегай повторения вопросов, которые могли быть сгенерированы в предыдущих запросах на эту же тему.
 
@@ -64,7 +87,22 @@ export const generateQuestionsFromAPI = async (batchSize: number, difficulty: Di
 }
 Убедись, что весь ответ является валидным JSON массивом. Не добавляй никакого текста до или после JSON массива.
 Если по какой-то причине не можешь сгенерировать ${batchSize} вопросов (например, тема слишком узкая для такого количества на данном уровне сложности), сгенерируй столько, сколько можешь, но не менее одного, если это возможно.
-`;
+`
+    };
+  }
+};
+
+export const generateQuestionsFromAPI = async (batchSize: number, difficulty: Difficulty, topic: string): Promise<GeneratedQuestion[]> => {
+  // For Java topic, use pre-loaded questions for quick testing
+  if (topic.toLowerCase().includes('java')) {
+    console.log('Using pre-loaded questions for Java');
+    return getMockQuestions(difficulty, batchSize);
+  }
+
+  const currentLanguage = i18n.language || 'ru';
+  const languagePrompts = getLanguagePrompts(currentLanguage);
+  const difficultyText = languagePrompts.difficultyMap[difficulty];
+  const prompt = languagePrompts.promptTemplate(batchSize, topic, difficultyText);
 
   try {
     const response: GenerateContentResponse = await ai.models.generateContent({
@@ -80,28 +118,67 @@ export const generateQuestionsFromAPI = async (batchSize: number, difficulty: Di
     
     const parsedData = parseJsonFromText<GeneratedQuestion[]>(response.text || '', 'generateQuestions');
 
-    if (!parsedData || !Array.isArray(parsedData) ) {
-      console.error("Получены некорректные данные от API при генерации вопросов (не массив):", parsedData);
-      throw new Error("Не удалось получить корректный список вопросов от AI. Формат ответа не является массивом.");
+    if (!parsedData || !Array.isArray(parsedData)) {
+      console.error("Invalid data received from API when generating questions (not an array):", parsedData);
+      throw new Error("Failed to get a valid list of questions from AI. Response format is not an array.");
     }
-     if (parsedData.some(item => typeof item.question !== 'string' || typeof item.answer !== 'string')) {
-      console.error("Получены некорректные данные от API (неверная структура объекта):", parsedData);
-      throw new Error("Не удалось получить корректный список вопросов от AI. Структура объектов в массиве неверна.");
+    if (parsedData.some(item => typeof item.question !== 'string' || typeof item.answer !== 'string')) {
+      console.error("Invalid data received from API (incorrect object structure):", parsedData);
+      throw new Error("Failed to get a valid list of questions from AI. Object structure in array is incorrect.");
     }
     return parsedData;
   } catch (error) {
-    console.error("Ошибка при генерации вопросов:", error);
-    // Provide a more user-friendly error or re-throw a custom error
+    console.error("Error generating questions:", error);
     if (error instanceof Error && error.message.startsWith('AI_PARSING_ERROR')) {
-        throw new Error(`Проблема с ответом от AI: не удалось обработать полученные данные для вопросов. Попробуйте еще раз.`);
+      throw new Error(`Problem with AI response: failed to process received data for questions. Please try again.`);
     }
-    const errorMessage = error instanceof Error ? error.message : "Произошла неизвестная ошибка при запросе к AI.";
-    throw new Error(`Не удалось сгенерировать вопросы: ${errorMessage}`);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred when requesting AI.";
+    throw new Error(`Failed to generate questions: ${errorMessage}`);
   }
 };
 
-export const evaluateAnswerWithAPI = async (questionText: string, correctAnswer: string, userAnswer: string, topic: string): Promise<FeedbackResponse> => {
-  const prompt = `
+const getFeedbackPrompts = (language: string) => {
+  if (language === 'en') {
+    return (questionText: string, correctAnswer: string, userAnswer: string, topic: string) => `
+Act as an experienced interviewer and expert in the field of "${topic}".
+You are provided with a question, reference answer (for your information) and candidate's answer.
+Your task is to evaluate the candidate's answer in English and provide two types of feedback: brief and detailed. Don't be too strict, but not too lenient either. If the user answered with one word but it's correct, don't criticize them.
+
+Question:
+"${questionText}"
+
+Reference answer (for your information, don't show it to the candidate in feedback, but use it to evaluate the completeness and correctness of the candidate's answer):
+"${correctAnswer}"
+
+Candidate's answer:
+"${userAnswer}"
+
+Return the response STRICTLY in JSON object format with the following keys: "shortFeedback" and "detailedFeedback".
+
+1. "shortFeedback":
+   * Very brief summary of the candidate's answer evaluation (1-2 sentences, no more than 30-40 words). For example: "Excellent answer, all key points covered!" or "Generally good, but missing mention of XYZ." or "Answer incomplete, important aspects missed."
+   * This text should be plain text without markdown.
+
+2. "detailedFeedback":
+   * Detailed analysis of the candidate's answer in English.
+   * Indicate what was said correctly and completely.
+   * Explain what was missing in the answer or what important points were omitted. Compare with the reference answer.
+   * If there are incorrect statements, tactfully point them out and explain why they are wrong.
+   * Give specific recommendations on how to improve the answer or what to study additionally.
+   * If you provide code examples, USE MARKDOWN for code blocks with language specification (e.g., \`\`\`java ...code... \`\`\`).
+   * Use markdown for other formatting (lists, highlighting) if it improves readability.
+
+Example JSON response (for Java topic):
+{
+  "shortFeedback": "Good answer, but could have been more detailed about garbage collection.",
+  "detailedFeedback": "You correctly identified the main OOP principles. However, when talking about polymorphism, it would be great to give an example.\\n\\nFor instance, the classic case with shapes:\\n\\n\`\`\`java\\nabstract class Shape {\\n    abstract void draw();\\n}\\n\\nclass Circle extends Shape {\\n    @Override\\n    void draw() {\\n        System.out.println(\\"Drawing a circle\\");\\n    }\\n}\\n\\nclass Square extends Shape {\\n    @Override\\n    void draw() {\\n        System.out.println(\\"Drawing a square\\");\\n    }\\n}\\n\`\`\`\\n\\nAlso, you mentioned garbage collector but didn't detail its work. I recommend reading about object generations and different GC algorithms."
+}
+
+Respond only in English. Make sure the entire response is a valid JSON object with the specified keys.
+Be constructive, friendly and supportive. The goal is to help the candidate improve their knowledge.
+`;
+  } else {
+    return (questionText: string, correctAnswer: string, userAnswer: string, topic: string) => `
 Выступи в роли опытного интервьюера и эксперта в области "${topic}".
 Тебе предоставлен вопрос, эталонный ответ (для твоего сведения) и ответ кандидата.
 Твоя задача - оценить ответ кандидата на русском языке и предоставить два вида обратной связи: краткую и подробную. Будь не слишком строгим, но и не слишком мягким. Если пользователь ответил одним словом, но он верный то не надо его критиковать.
@@ -138,7 +215,14 @@ export const evaluateAnswerWithAPI = async (questionText: string, correctAnswer:
 
 Отвечай только на русском языке. Убедись, что весь ответ является валидным JSON объектом с указанными ключами.
 Будь конструктивным, дружелюбным и поддерживающим. Цель - помочь кандидату улучшить свои знания.
-  `;
+`;
+  }
+};
+
+export const evaluateAnswerWithAPI = async (questionText: string, correctAnswer: string, userAnswer: string, topic: string): Promise<FeedbackResponse> => {
+  const currentLanguage = i18n.language || 'ru';
+  const promptGenerator = getFeedbackPrompts(currentLanguage);
+  const prompt = promptGenerator(questionText, correctAnswer, userAnswer, topic);
 
   try {
     const response: GenerateContentResponse = await ai.models.generateContent({
@@ -153,18 +237,18 @@ export const evaluateAnswerWithAPI = async (questionText: string, correctAnswer:
     const parsedData = parseJsonFromText<FeedbackResponse>(response.text || '', 'evaluateAnswer');
 
     if (!parsedData || typeof parsedData.shortFeedback !== 'string' || typeof parsedData.detailedFeedback !== 'string') {
-        console.error("Получены некорректные данные от API при оценке ответа (неверная структура):", parsedData);
-        throw new Error("Не удалось получить корректную обратную связь от AI. Формат ответа не соответствует ожидаемому (shortFeedback и detailedFeedback должны быть строками).");
+        console.error("Invalid data received from API when evaluating answer (incorrect structure):", parsedData);
+        throw new Error("Failed to get valid feedback from AI. Response format does not match expected (shortFeedback and detailedFeedback must be strings).");
     }
     return parsedData;
 
   } catch (error) {
-    console.error("Ошибка при оценке ответа:", error);
+    console.error("Error evaluating answer:", error);
      if (error instanceof Error && error.message.startsWith('AI_PARSING_ERROR')) {
-        throw new Error(`Проблема с ответом от AI: не удалось обработать полученные данные для обратной связи. Попробуйте еще раз.`);
+        throw new Error(`Problem with AI response: failed to process received data for feedback. Please try again.`);
     }
-    const errorMessage = error instanceof Error ? error.message : "Произошла неизвестная ошибка при запросе к AI.";
-    throw new Error(`Не удалось оценить ответ: ${errorMessage}`);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred when requesting AI.";
+    throw new Error(`Failed to evaluate answer: ${errorMessage}`);
   }
 };
 

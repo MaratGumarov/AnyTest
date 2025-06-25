@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { QuestionItem, SessionSettings } from '../types';
@@ -15,6 +16,7 @@ interface SummaryScreenProps {
 }
 
 const SummaryScreen: React.FC<SummaryScreenProps> = ({ answeredQuestions, onStartNewSession, onBackToQuestions, sessionSettings }) => {
+  const { t } = useTranslation();
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   // For spoilers within each summary item
   const [spoilerVisibility, setSpoilerVisibility] = useState<Record<string, { correctAnswer?: boolean, detailedFeedback?: boolean }>>({});
@@ -35,7 +37,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({ answeredQuestions, onStar
 
   const handleExportData = () => {
     if (answeredQuestions.length === 0) {
-      alert("Нет данных для экспорта.");
+      alert(t('results.noDataToExport'));
       return;
     }
     const dataToExport = answeredQuestions.map(q => ({
@@ -67,11 +69,11 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({ answeredQuestions, onStar
       <Card variant="default" padding="lg" shadow="xl">
         <div className="text-center mb-8">
           <ListBulletIcon className="w-16 h-16 text-indigo-500 dark:text-indigo-400 mx-auto mb-4" />
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Результаты сессии</h2>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{t('results.title')}</h2>
           {sessionSettings && (
             <p className="text-slate-700 dark:text-slate-400 mt-2">
-              Тема: <span className="font-semibold">{sessionSettings.topic}</span>, 
-              Сложность: <span className="font-semibold">{sessionSettings.difficulty}</span>
+              {t('results.topic')}: <span className="font-semibold">{sessionSettings.topic}</span>, 
+              {t('results.difficulty')}: <span className="font-semibold">{sessionSettings.difficulty}</span>
             </p>
           )}
         </div>
@@ -79,8 +81,8 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({ answeredQuestions, onStar
         {sortedQuestions.length === 0 ? (
           <div className="text-center py-10">
             <SparklesIcon className="w-12 h-12 text-slate-400 dark:text-slate-500 mx-auto mb-4" />
-            <p className="text-slate-700 dark:text-slate-400">Вы не ответили ни на один вопрос в этой сессии.</p>
-            <p className="text-sm text-slate-600 dark:text-slate-500 mt-1">Попробуйте пройти сессию еще раз!</p>
+            <p className="text-slate-700 dark:text-slate-400">{t('results.noAnswers')}</p>
+            <p className="text-sm text-slate-600 dark:text-slate-500 mt-1">{t('results.tryAgain')}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -95,28 +97,28 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({ answeredQuestions, onStar
                   className="p-4 justify-between text-left hover:bg-slate-100 dark:hover:bg-slate-600/50"
                 >
                   <span className="font-medium text-slate-800 dark:text-slate-200">
-                    Вопрос {index + 1}: {item.questionText.substring(0, 60)}{item.questionText.length > 60 ? '...' : ''}
+                    {t('results.questionNumber')} {index + 1}: {item.questionText.substring(0, 60)}{item.questionText.length > 60 ? '...' : ''}
                   </span>
                 </Button>
                 
                 {expandedItems[item.id] && (
                   <div className="p-4 bg-white dark:bg-slate-800 space-y-3">
                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                      <strong>Полный вопрос:</strong> {item.questionText}
+                      <strong>{t('results.fullQuestion')}</strong> {item.questionText}
                     </p>
                     
                     <div>
-                      <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-300 mb-1">Ваш ответ:</h4>
+                      <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-300 mb-1">{t('results.yourAnswer')}</h4>
                       <Card variant="glass" padding="sm" className="bg-slate-50 dark:bg-slate-700/70">
                         <div className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap text-sm">
-                          {item.userAnswer || <span className="italic">Ответ не был дан.</span>}
+                          {item.userAnswer || <span className="italic">{t('results.noAnswerGiven')}</span>}
                         </div>
                       </Card>
                     </div>
                     
                     {item.correctAnswer && (
                       <Spoiler
-                        title="Эталонный ответ"
+                        title={t('results.correctAnswer')}
                         isOpen={!!spoilerVisibility[item.id]?.correctAnswer}
                         onToggle={() => toggleInnerSpoiler(item.id, 'correctAnswer')}
                       >
@@ -130,7 +132,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({ answeredQuestions, onStar
                     
                     {item.shortFeedback && (
                       <div>
-                                                  <h4 className="text-sm font-semibold text-sky-700 dark:text-sky-300 mb-1">💡 Краткая обратная связь:</h4>
+                                                  <h4 className="text-sm font-semibold text-sky-700 dark:text-sky-300 mb-1">💡 {t('results.shortFeedback')}</h4>
                         <Card variant="glass" padding="sm" className="bg-sky-50 dark:bg-gradient-to-r dark:from-sky-500/20 dark:to-cyan-500/20 border-sky-200 dark:border-sky-400/30">
                           <div className="prose prose-sm max-w-none text-sky-600 dark:text-sky-100">
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.shortFeedback}</ReactMarkdown>
@@ -141,7 +143,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({ answeredQuestions, onStar
                     
                     {item.detailedFeedback && (
                       <Spoiler
-                        title="Подробная обратная связь"
+                        title={t('results.detailedFeedback')}
                         isOpen={!!spoilerVisibility[item.id]?.detailedFeedback}
                         onToggle={() => toggleInnerSpoiler(item.id, 'detailedFeedback')}
                       >
@@ -168,7 +170,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({ answeredQuestions, onStar
               leftIcon={<ArrowUturnLeftIcon className="w-5 h-5" />}
               className="flex-1"
             >
-              Вернуться к вопросам
+              {t('results.backToQuestions')}
             </Button>
           )}
           
@@ -179,7 +181,7 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({ answeredQuestions, onStar
             leftIcon={<HomeIcon className="w-5 h-5" />}
             className="flex-1"
           >
-            Начать новую сессию
+            {t('results.newSession')}
           </Button>
           
           <Button
@@ -190,15 +192,15 @@ const SummaryScreen: React.FC<SummaryScreenProps> = ({ answeredQuestions, onStar
             leftIcon={<DownloadIcon className="w-5 h-5" />}
             className="flex-1"
           >
-            Экспортировать результаты
+            {t('results.exportResults')}
           </Button>
         </div>
       </Card>
       
       <footer className="text-center mt-8 py-4">
         <p className="text-xs text-slate-600 dark:text-slate-400">
-          &copy; {new Date().getFullYear()} {APP_TITLE}.
-          На базе Gemini API.
+          &copy; {new Date().getFullYear()} {t('app.title')}.
+          {t('app.poweredBy')}.
         </p>
       </footer>
     </div>

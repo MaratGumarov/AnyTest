@@ -1,0 +1,103 @@
+{
+  "app": {
+    "title": "AI Interview Coach",
+    "subtitle": "Тренажер для подготовки к собеседованиям",
+    "poweredBy": "На базе Gemini API"
+  },
+  "navigation": {
+    "back": "Назад",
+    "next": "Далее",
+    "finish": "Завершить",
+    "results": "Результаты",
+    "newSession": "Новая сессия"
+  },
+  "setup": {
+    "title": "Настройте сессию",
+    "description": "Выберите тему и сложность для начала подготовки",
+    "topicLabel": "Тема вопросов",
+    "difficultyLabel": "Уровень сложности",
+    "customTopicLabel": "Укажите свою тему",
+    "customTopicPlaceholder": "Например: История Средневековья",
+    "startButton": "Начать сессию",
+    "errors": {
+      "topicRequired": "Пожалуйста, введите название для своей темы.",
+      "topicNotSelected": "Тема не выбрана. Пожалуйста, выберите или укажите тему."
+    }
+  },
+  "questions": {
+    "loading": "Генерируем вопросы для вас...",
+    "loadingSubtext": "Это может занять несколько секунд",
+    "loadingQuestions": "Загрузка вопросов...",
+    "loadingMore": "загружаем ещё...",
+    "loadingNewQuestions": "Загружаем новые вопросы...",
+    "questionProgress": "Вопрос {{current}} из {{total}}",
+    "viewResults": "Посмотреть результаты",
+    "yourAnswer": "Ваш ответ:",
+    "answerPlaceholder": "Введите ваш ответ здесь...",
+    "checkAnswer": "Проверить ответ",
+    "checking": "Проверяем ответ...",
+    "correctAnswer": "Правильный ответ:",
+    "shortFeedback": "Краткая оценка:",
+    "detailedFeedback": "Подробная обратная связь",
+    "showAnswer": "Ответ",
+    "speechRecognition": {
+      "start": "Начать голосовой ввод",
+      "stop": "Остановить запись",
+      "notSupported": "Голосовой ввод не поддерживается в вашем браузере"
+    }
+  },
+  "results": {
+    "title": "Результаты сессии",
+    "topic": "Тема",
+    "difficulty": "Сложность",
+    "noAnswers": "Вы не ответили ни на один вопрос в этой сессии.",
+    "tryAgain": "Попробуйте пройти сессию еще раз!",
+    "questionNumber": "Вопрос",
+    "fullQuestion": "Полный вопрос:",
+    "yourAnswer": "Ваш ответ:",
+    "noAnswerGiven": "Ответ не был дан.",
+    "correctAnswer": "Эталонный ответ",
+    "shortFeedback": "Краткая обратная связь:",
+    "detailedFeedback": "Подробная обратная связь",
+    "backToQuestions": "Вернуться к вопросам",
+    "newSession": "Начать новую сессию",
+    "exportResults": "Экспортировать результаты",
+    "noDataToExport": "Нет данных для экспорта."
+  },
+  "theme": {
+    "light": "Светлая",
+    "dark": "Темная",
+    "system": "Системная",
+    "tooltip": "Текущая тема: {{theme}}. Нажмите для переключения"
+  },
+  "language": {
+    "tooltip": "Текущий язык: {{language}}. Нажмите для переключения"
+  },
+  "topics": {
+    "frontend": "Frontend разработка",
+    "backend": "Backend разработка",
+    "fullstack": "Fullstack разработка",
+    "devops": "DevOps",
+    "mobile": "Мобильная разработка",
+    "data_science": "Data Science",
+    "machine_learning": "Machine Learning",
+    "product_management": "Product Management",
+    "design": "UI/UX Design",
+    "qa": "Quality Assurance",
+    "custom": "Своя тема"
+  },
+  "difficulties": {
+    "junior": "Junior",
+    "middle": "Middle",
+    "senior": "Senior"
+  },
+  "common": {
+    "close": "Закрыть",
+    "error": "Ошибка",
+    "loading": "Загрузка...",
+    "retry": "Повторить",
+    "cancel": "Отмена",
+    "confirm": "Подтвердить",
+    "save": "Сохранить"
+  }
+} 

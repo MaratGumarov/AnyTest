@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { QuestionItem, InterviewConfig } from './types';
 import { generateQuestions } from './services/geminiService';
 import SetupScreen from './components/SetupScreen';
@@ -7,10 +8,12 @@ import SummaryScreen from './components/SummaryScreen';
 import { LoadingSpinner } from './components/icons';
 import { Button } from './components/ui';
 import ThemeToggle from './components/ThemeToggle';
+import { LanguageToggle } from './src/components/LanguageToggle';
 
 type AppScreen = 'config' | 'questions' | 'results';
 
 function App() {
+  const { t } = useTranslation();
   const [currentScreen, setCurrentScreen] = useState<AppScreen>('config');
   const [config, setConfig] = useState<InterviewConfig | null>(null);
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
@@ -34,7 +37,7 @@ function App() {
           setHasMoreQuestionsToLoad(false);
         }
       } catch (error) {
-        console.error('Ошибка при загрузке дополнительных вопросов:', error);
+        console.error('Error loading additional questions:', error);
         setHasMoreQuestionsToLoad(false);
       } finally {
         setIsFetchingMore(false);
@@ -57,8 +60,8 @@ function App() {
       setCurrentQuestionIndex(0);
       setCurrentScreen('questions');
     } catch (error) {
-      console.error('Ошибка при генерации вопросов:', error);
-      setError('Не удалось сгенерировать вопросы. Пожалуйста, проверьте ваш API ключ и попробуйте снова.');
+      console.error('Error generating questions:', error);
+      setError(t('setup.errors.topicNotSelected'));
     } finally {
       setIsLoading(false);
     }
@@ -117,10 +120,10 @@ function App() {
         <div className="text-center">
           <LoadingSpinner className="w-16 h-16 mb-4 mx-auto" />
           <p className="text-xl text-slate-800 dark:text-slate-400">
-            Генерируем вопросы для вас...
+            {t('questions.loading')}
           </p>
           <p className="text-sm text-slate-600 dark:text-slate-500 mt-2">
-            Это может занять несколько секунд
+            {t('questions.loadingSubtext')}
           </p>
         </div>
       </div>
@@ -129,9 +132,10 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:via-purple-900 dark:to-violet-800 overflow-hidden">
-      {/* Переключатель темы - показываем только на экранах с вопросами и результатами */}
+      {/* Theme and language toggles - show only on questions and results screens */}
       {currentScreen !== 'config' && (
-        <div className="fixed top-4 right-4 z-50">
+        <div className="fixed top-4 right-4 z-50 flex gap-2">
+          <LanguageToggle variant="compact" />
           <ThemeToggle variant="compact" />
         </div>
       )}
@@ -146,7 +150,7 @@ function App() {
               onClick={() => setError(null)}
               className="mt-2 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 p-0 h-auto"
             >
-              Закрыть
+              {t('common.close')}
             </Button>
           </div>
         )}
