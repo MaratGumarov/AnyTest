@@ -15,7 +15,7 @@ interface SmartTopicInputProps {
 const SmartTopicInput: React.FC<SmartTopicInputProps> = ({ label, value, onChange }) => {
   const { t } = useTranslation();
   const { PREDEFINED_TOPICS } = useConstants();
-  const topics = PREDEFINED_TOPICS.map(t => t.value).filter(t => t && t.trim() !== '');
+  const topics = PREDEFINED_TOPICS.map(t => t.label).filter(t => t && t.trim() !== '');
 
   const [isFocused, setIsFocused] = useState(false);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
