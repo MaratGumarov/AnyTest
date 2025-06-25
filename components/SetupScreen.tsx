@@ -4,7 +4,7 @@ import { Difficulty, SessionSettings } from '../types';
 import { DEFAULT_DIFFICULTY, DEFAULT_TOPIC_PREDEFINED } from '../constants';
 import { useConstants } from '../src/hooks/useConstants';
 import { AcademicCapIcon, ArrowRightIcon, SparklesIcon } from './icons';
-import { Button, Card, Input, Select } from './ui';
+import { Button, Card, Input, CustomSelect } from './ui';
 import ThemeToggle from './ThemeToggle';
 import { LanguageSelector } from '../src/components/LanguageSelector';
 import SmartTopicInput from './SmartTopicInput';
@@ -63,12 +63,11 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onStartSession }) => {
             onChange={setTopic}
           />
 
-          <Select
+          <CustomSelect
             label={t('setup.difficultyLabel')}
             options={DIFFICULTY_LEVELS}
             value={difficulty}
-            onChange={(e) => setDifficulty(e.target.value as Difficulty)}
-            variant="modern"
+            onChange={(value) => setDifficulty(value as Difficulty)}
           />
 
           <Button
