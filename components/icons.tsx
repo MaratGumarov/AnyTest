@@ -31,8 +31,10 @@ export const DownloadIcon: React.FC<{ className?: string }> = ({ className }) =>
 );
 
 export const SparklesIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className || "w-6 h-6"}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L1.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.25 12V7.5M18.25 12H22.5" />
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className || "w-6 h-6"}>
+    <path d="M12 0L14.09 8.26L22 9L14.09 9.74L12 18L9.91 9.74L2 9L9.91 8.26L12 0Z" />
+    <path d="M19 3L20.09 7.26L24 8L20.09 8.74L19 13L17.91 8.74L14 8L17.91 7.26L19 3Z" />
+    <path d="M5 11L6.09 15.26L10 16L6.09 16.74L5 21L3.91 16.74L0 16L3.91 15.26L5 11Z" />
   </svg>
 );
 
