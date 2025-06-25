@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../hooks/useTheme';
 import { Button } from './ui';
 
@@ -32,6 +33,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
   size = 'md',
   variant = 'button'
 }) => {
+  const { t } = useTranslation();
   const { theme, toggleTheme } = useTheme();
 
   const getIcon = () => {
@@ -48,16 +50,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
   };
 
   const getLabel = () => {
-    switch (theme) {
-      case 'light':
-        return 'Светлая';
-      case 'dark':
-        return 'Темная';
-      case 'system':
-        return 'Системная';
-      default:
-        return 'Тема';
-    }
+    return t(`theme.${theme}`);
   };
 
   if (variant === 'compact') {
@@ -73,7 +66,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
           hover:scale-105 active:scale-95
           ${className}
         `}
-        title={`Текущая тема: ${getLabel()}. Нажмите для переключения`}
+        title={t('theme.tooltip', { theme: getLabel() })}
       >
         {getIcon()}
       </button>
@@ -90,7 +83,7 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
         transition-all duration-200 hover:scale-105 active:scale-95
         ${className}
       `}
-      title={`Текущая тема: ${getLabel()}. Нажмите для переключения`}
+      title={t('theme.tooltip', { theme: getLabel() })}
     >
       {variant === 'button' && getLabel()}
     </Button>

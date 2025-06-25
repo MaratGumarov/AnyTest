@@ -6,7 +6,7 @@ import { useConstants } from '../src/hooks/useConstants';
 import { AcademicCapIcon, ArrowRightIcon, SparklesIcon } from './icons';
 import { Button, Card, Input, Select } from './ui';
 import ThemeToggle from './ThemeToggle';
-import { LanguageToggle } from '../src/components/LanguageToggle';
+import { LanguageSelector } from '../src/components/LanguageSelector';
 import SmartTopicInput from './SmartTopicInput';
 
 interface SetupScreenProps {
@@ -36,8 +36,10 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onStartSession }) => {
     <div className="screen container mx-auto max-w-lg p-4 md:p-8 flex flex-col items-center justify-center min-h-[calc(100vh-150px)]">
       {/* Theme and language toggles in top right corner */}
       <div className="fixed top-4 right-4 z-50 flex gap-2">
-        <LanguageToggle variant="compact" />
-        <ThemeToggle variant="compact" />
+        <div className="flex items-center gap-3">
+          <ThemeToggle variant="compact" />
+          <LanguageSelector variant="compact" />
+        </div>
       </div>
       
       <Card variant="default" padding="lg" shadow="xl" className="w-full">

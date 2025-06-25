@@ -8,8 +8,7 @@ import SummaryScreen from './components/SummaryScreen';
 import LoadingScreen from './components/LoadingScreen';
 import { LoadingSpinner } from './components/icons';
 import { Button } from './components/ui';
-import ThemeToggle from './components/ThemeToggle';
-import { LanguageToggle } from './src/components/LanguageToggle';
+
 
 type AppScreen = 'config' | 'questions' | 'results';
 
@@ -123,13 +122,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:via-purple-900 dark:to-violet-800 overflow-hidden">
-      {/* Theme and language toggles - show only on questions and results screens */}
-      {currentScreen !== 'config' && (
-        <div className="fixed top-4 right-4 z-50 flex gap-2">
-          <LanguageToggle variant="compact" />
-          <ThemeToggle variant="compact" />
-        </div>
-      )}
+
       
       <div className="container mx-auto px-4 py-2 max-w-4xl h-screen">
         {error && (

@@ -41,15 +41,17 @@ const getUniversalPrompts = () => {
       [Difficulty.MIDDLE]: 'Middle (intermediate)',
       [Difficulty.SENIOR]: 'Senior (advanced)',
     },
-    promptTemplate: (batchSize: number, topic: string, difficultyText: string) => `
+    promptTemplate: (batchSize: number, topic: string, difficultyText: string, interfaceLanguage: string) => `
 Generate ${batchSize} UNIQUE interview questions for the topic "${topic}" at "${difficultyText}" level.
+
+CONTEXT: The user interface is currently in "${interfaceLanguage}" language, which may give you a hint about the user's preferred language, but you should still primarily detect the language from the topic itself.
 
 IMPORTANT: Detect the language of the topic and generate questions and answers in the SAME language as the topic. 
 - If the topic is in English, generate questions and answers in English
 - If the topic is in Russian (Русский), generate questions and answers in Russian
 - If the topic is in Tatar (Татарча), generate questions and answers in Tatar
 - If the topic is in any other language, generate questions and answers in that language
-- If the language is unclear, default to English
+- If the language is unclear, use the interface language (${interfaceLanguage}) as fallback
 
 First, analyze the topic to understand its mood and context (e.g., is it for a serious technical interview, a fun quiz, a historical exam?).
 Adjust the tone and style of the questions and answers accordingly. For humorous or informal topics, the questions should also be light-hearted and creative. For professional topics, maintain a formal, relevant tone.
@@ -96,7 +98,7 @@ export const generateQuestionsFromAPI = async (batchSize: number, difficulty: Di
 
   const universalPrompts = getUniversalPrompts();
   const difficultyText = universalPrompts.difficultyMap[difficulty];
-  const prompt = universalPrompts.promptTemplate(batchSize, topic, difficultyText);
+  const prompt = universalPrompts.promptTemplate(batchSize, topic, difficultyText, i18n.language);
 
   try {
     const response: GenerateContentResponse = await ai.models.generateContent({
@@ -134,14 +136,17 @@ export const generateQuestionsFromAPI = async (batchSize: number, difficulty: Di
 export const getTopicSuggestion = async (query: string): Promise<string[]> => {
   if (!query) return [];
 
+  const interfaceLanguage = i18n.language || 'en';
   const prompt = `You are a creative assistant. A user is typing a topic for a quiz or test. Your goal is to suggest a list of 3 to 5 engaging and relevant topics based on their input.
+
+CONTEXT: The user interface is currently in "${interfaceLanguage}" language, which may give you a hint about the user's preferred language, but you should still primarily detect the language from the user input itself.
 
 IMPORTANT: Detect the language of the user input and generate suggestions in the SAME language as the input.
 - If the input is in English, generate suggestions in English
 - If the input is in Russian (Русский), generate suggestions in Russian  
 - If the input is in Tatar (Татарча), generate suggestions in Tatar
 - If the input is in any other language, generate suggestions in that language
-- If the language is unclear, default to English
+- If the language is unclear, use the interface language (${interfaceLanguage}) as fallback
 
 User input: "${query}"
 Analyze the input to understand the theme and mood (e.g., "technical", "historical", "humorous").
@@ -156,7 +161,7 @@ Examples:
     
   try {
     const response: GenerateContentResponse = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.0-flash-lite',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -180,16 +185,18 @@ Examples:
   }
 };
 
-const getUniversalFeedbackPrompt = (questionText: string, correctAnswer: string, userAnswer: string, topic: string) => `
+const getUniversalFeedbackPrompt = (questionText: string, correctAnswer: string, userAnswer: string, topic: string, interfaceLanguage: string) => `
 Act as an experienced interviewer and expert in the field of "${topic}".
 You are provided with a question, reference answer (for your information) and candidate's answer.
+
+CONTEXT: The user interface is currently in "${interfaceLanguage}" language, which may give you a hint about the user's preferred language, but you should still primarily detect the language from the question itself.
 
 IMPORTANT: Detect the language of the question and provide feedback in the SAME language as the question.
 - If the question is in English, provide feedback in English
 - If the question is in Russian (Русский), provide feedback in Russian
 - If the question is in Tatar (Татарча), provide feedback in Tatar
 - If the question is in any other language, provide feedback in that language
-- If the language is unclear, default to English
+- If the language is unclear, use the interface language (${interfaceLanguage}) as fallback
 
 Your task is to evaluate the candidate's answer and provide two types of feedback: brief and detailed. Don't be too strict, but not too lenient either. If the user answered with one word but it's correct, don't criticize them.
 
@@ -243,7 +250,7 @@ Be constructive, friendly and supportive. The goal is to help the candidate impr
 `;
 
 export const evaluateAnswerWithAPI = async (questionText: string, correctAnswer: string, userAnswer: string, topic: string): Promise<FeedbackResponse> => {
-  const prompt = getUniversalFeedbackPrompt(questionText, correctAnswer, userAnswer, topic);
+  const prompt = getUniversalFeedbackPrompt(questionText, correctAnswer, userAnswer, topic, i18n.language);
 
   try {
     const response: GenerateContentResponse = await ai.models.generateContent({

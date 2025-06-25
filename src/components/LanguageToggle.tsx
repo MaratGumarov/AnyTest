@@ -1,9 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLanguage, type Language } from '../hooks/useLanguage';
+import Select from '../../components/ui/Select';
 
 interface LanguageToggleProps {
-  variant?: 'button' | 'compact';
+  variant?: 'button' | 'compact' | 'select';
 }
 
 const LanguageIcon: React.FC<{ language: Language }> = ({ language }) => {
@@ -40,13 +41,41 @@ const LanguageIcon: React.FC<{ language: Language }> = ({ language }) => {
 };
 
 export const LanguageToggle: React.FC<LanguageToggleProps> = ({ 
-  variant = 'compact' 
+  variant = 'select' 
 }) => {
   const { t } = useTranslation();
-  const { currentLanguage, toggleLanguage, getLanguageName } = useLanguage();
+  const { currentLanguage, changeLanguage, getLanguageName, availableLanguages } = useLanguage();
 
+  const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newLanguage = event.target.value as Language;
+    changeLanguage(newLanguage);
+  };
+
+  const languageOptions = availableLanguages.map(lang => ({
+    value: lang,
+    label: getLanguageName(lang)
+  }));
+
+  if (variant === 'select') {
+    return (
+      <div className="w-auto min-w-[140px]">
+        <Select
+          options={languageOptions}
+          value={currentLanguage}
+          onChange={handleLanguageChange}
+          variant="modern"
+          fullWidth={false}
+          className="text-sm py-2 px-3"
+        />
+      </div>
+    );
+  }
+
+  // Legacy button variants for backward compatibility
   const handleClick = () => {
-    toggleLanguage();
+    const currentIndex = availableLanguages.indexOf(currentLanguage);
+    const nextIndex = (currentIndex + 1) % availableLanguages.length;
+    changeLanguage(availableLanguages[nextIndex]);
   };
 
   if (variant === 'button') {
