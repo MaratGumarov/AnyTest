@@ -13,15 +13,17 @@
   },
   "setup": {
     "title": "Настройте сессию",
-    "description": "Выберите тему и сложность для начала подготовки",
+    "description": "Выберите тему и сложность, чтобы начать подготовку",
     "topicLabel": "Тема вопросов",
-    "difficultyLabel": "Уровень сложности",
-    "customTopicLabel": "Укажите свою тему",
-    "customTopicPlaceholder": "Например: История Средневековья",
-    "startButton": "Начать сессию",
+    "difficultyLabel": "Выберите сложность",
+    "customTopicLabel": "Или введите свою тему",
+    "customTopicPlaceholder": "например, 'Лучшие практики React Hooks'",
+    "startButton": "Начать интервью",
+    "aiSuggestion": "AI предлагает:",
+    "startTypingToFilter": "Начните печатать для фильтрации тем...",
     "errors": {
-      "topicRequired": "Пожалуйста, введите название для своей темы.",
-      "topicNotSelected": "Тема не выбрана. Пожалуйста, выберите или укажите тему."
+      "topicRequired": "Пожалуйста, введите свою тему.",
+      "topicNotSelected": "Пожалуйста, выберите или введите тему."
     }
   },
   "questions": {

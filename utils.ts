@@ -14,4 +14,18 @@ export function generateUUID(): string {
     const v = c === 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
+}
+
+export function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+
+  const debounced = (...args: Parameters<F>) => {
+    if (timeout !== null) {
+      clearTimeout(timeout);
+      timeout = null;
+    }
+    timeout = setTimeout(() => func(...args), waitFor);
+  };
+
+  return debounced as (...args: Parameters<F>) => void;
 } 

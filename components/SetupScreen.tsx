@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Difficulty, SessionSettings } from '../types';
-import { DEFAULT_DIFFICULTY, DEFAULT_TOPIC_PREDEFINED, APP_TITLE } from '../constants';
+import { DEFAULT_DIFFICULTY, DEFAULT_TOPIC_PREDEFINED } from '../constants';
 import { useConstants } from '../src/hooks/useConstants';
 import { AcademicCapIcon, ArrowRightIcon, SparklesIcon } from './icons';
 import { Button, Card, Input, Select } from './ui';
 import ThemeToggle from './ThemeToggle';
 import { LanguageToggle } from '../src/components/LanguageToggle';
+import SmartTopicInput from './SmartTopicInput';
 
 interface SetupScreenProps {
   onStartSession: (settings: SessionSettings) => void;
@@ -14,43 +15,21 @@ interface SetupScreenProps {
 
 const SetupScreen: React.FC<SetupScreenProps> = ({ onStartSession }) => {
   const { t } = useTranslation();
-  const { DIFFICULTY_LEVELS, PREDEFINED_TOPICS, CUSTOM_TOPIC_VALUE } = useConstants();
+  const { DIFFICULTY_LEVELS } = useConstants();
   const [difficulty, setDifficulty] = useState<Difficulty>(DEFAULT_DIFFICULTY);
-  const [selectedPredefinedTopic, setSelectedPredefinedTopic] = useState<string>(DEFAULT_TOPIC_PREDEFINED);
-  const [customTopic, setCustomTopic] = useState<string>('');
-  const [isCustomTopicMode, setIsCustomTopicMode] = useState<boolean>(false);
+  const [topic, setTopic] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    setIsCustomTopicMode(selectedPredefinedTopic === CUSTOM_TOPIC_VALUE);
-    if (selectedPredefinedTopic !== CUSTOM_TOPIC_VALUE) {
-      setCustomTopic('');
-      setErrorMessage(null);
-    }
-  }, [selectedPredefinedTopic]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
     
-    let finalTopic = '';
-
-    if (isCustomTopicMode) {
-      if (!customTopic.trim()) {
-        setErrorMessage(t('setup.errors.topicRequired'));
-        return;
-      }
-      finalTopic = customTopic.trim();
-    } else {
-      finalTopic = selectedPredefinedTopic;
-    }
-    
-    if (!finalTopic) {
-      setErrorMessage(t('setup.errors.topicNotSelected'));
+    if (!topic.trim()) {
+      setErrorMessage(t('setup.errors.topicRequired'));
       return;
     }
 
-    onStartSession({ difficulty, topic: finalTopic });
+    onStartSession({ difficulty, topic: topic.trim() });
   };
 
   return (
@@ -76,23 +55,11 @@ const SetupScreen: React.FC<SetupScreenProps> = ({ onStartSession }) => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <Select
+          <SmartTopicInput
             label={t('setup.topicLabel')}
-            options={PREDEFINED_TOPICS}
-            value={selectedPredefinedTopic}
-            onChange={(e) => setSelectedPredefinedTopic(e.target.value)}
-            variant="modern"
+            value={topic}
+            onChange={setTopic}
           />
-
-          {isCustomTopicMode && (
-            <Input
-              label={t('setup.customTopicLabel')}
-              value={customTopic}
-              onChange={(e) => setCustomTopic(e.target.value)}
-              placeholder={t('setup.customTopicPlaceholder')}
-              variant="modern"
-            />
-          )}
 
           <Select
             label={t('setup.difficultyLabel')}

@@ -19,6 +19,8 @@
     "customTopicLabel": "Specify Your Topic",
     "customTopicPlaceholder": "e.g., Medieval History",
     "startButton": "Start Session",
+    "aiSuggestion": "AI Suggestion:",
+    "startTypingToFilter": "Start typing to filter topics...",
     "errors": {
       "topicRequired": "Please enter a name for your custom topic.",
       "topicNotSelected": "No topic selected. Please choose or specify a topic."
@@ -98,6 +100,7 @@
     "retry": "Retry",
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "save": "Save"
+    "save": "Save",
+    "noResultsFound": "No results found"
   }
 } 

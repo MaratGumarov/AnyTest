@@ -44,6 +44,9 @@ const getLanguagePrompts = (language: string) => {
       },
       promptTemplate: (batchSize: number, topic: string, difficultyText: string) => `
 Generate ${batchSize} UNIQUE interview questions for the topic "${topic}" at "${difficultyText}" level.
+First, analyze the topic to understand its mood and context (e.g., is it for a serious technical interview, a fun quiz, a historical exam?).
+Adjust the tone and style of the questions and answers accordingly. For humorous or informal topics, the questions should also be light-hearted and creative. For professional topics, maintain a formal, relevant tone.
+
 Each question should be meaningful and relevant to the topic and difficulty level.
 Avoid repeating questions that might have been generated in previous requests for the same topic.
 
@@ -53,7 +56,7 @@ For each question provide:
 
 Return the response STRICTLY as a JSON array of objects. Each object should contain only "question" and "answer" keys.
 
-Example of one object in the array:
+Example of one object in the array for a serious topic:
 {
   "question": "What is JVM and why is it needed?",
   "answer": "JVM (Java Virtual Machine) is a virtual machine that executes Java bytecode. It provides platform independence for Java applications, allowing compiled Java code to run on any system where JVM is installed."
@@ -71,6 +74,9 @@ If for some reason you cannot generate ${batchSize} questions (e.g., the topic i
       },
       promptTemplate: (batchSize: number, topic: string, difficultyText: string) => `
 Сгенерируй ${batchSize} УНИКАЛЬНЫХ вопросов для собеседования по теме "${topic}" уровня "${difficultyText}".
+Сначала проанализируй тему, чтобы понять ее настроение и контекст (например, для серьезного технического собеседования, веселой викторины или исторического экзамена).
+Скорректируй тон и стиль вопросов и ответов соответствующим образом. Для юмористических или неформальных тем вопросы также должны быть беззаботными и креативными. Для профессиональных тем придерживайся формального, релевантного тона.
+
 Каждый вопрос должен быть осмысленным и релевантным теме и уровню сложности.
 Избегай повторения вопросов, которые могли быть сгенерированы в предыдущих запросах на эту же тему.
 
@@ -80,13 +86,12 @@ If for some reason you cannot generate ${batchSize} questions (e.g., the topic i
 
 Верни ответ СТРОГО в виде JSON-массива объектов. Каждый объект должен содержать только ключи "question" и "answer".
 
-Пример одного объекта в массиве:
+Пример одного объекта в массиве для серьезной темы:
 {
   "question": "Что такое JVM и зачем она нужна?",
   "answer": "JVM (Java Virtual Machine) - это виртуальная машина, которая исполняет байт-код Java. Она обеспечивает платформенную независимость Java-приложений, позволяя скомпилированному Java-коду работать на любой системе, где установлена JVM."
 }
 Убедись, что весь ответ является валидным JSON массивом. Не добавляй никакого текста до или после JSON массива.
-Если по какой-то причине не можешь сгенерировать ${batchSize} вопросов (например, тема слишком узкая для такого количества на данном уровне сложности), сгенерируй столько, сколько можешь, но не менее одного, если это возможно.
 `
     };
   }
@@ -137,9 +142,56 @@ export const generateQuestionsFromAPI = async (batchSize: number, difficulty: Di
   }
 };
 
+export const getTopicSuggestion = async (query: string): Promise<string[]> => {
+  if (!query) return [];
+
+  const currentLanguage = i18n.language || 'ru';
+  const prompt = currentLanguage === 'en'
+    ? `You are a creative assistant. A user is typing a topic for a quiz or test. Your goal is to suggest a list of 3 to 5 engaging and relevant topics based on their input.
+User input: "${query}"
+Analyze the input to understand the theme and mood (e.g., "technical", "historical", "humorous").
+Generate a list of 3-5 related topics that match this theme and mood.
+Each suggested topic should be short and concise (max 3-4 words).
+Return the response STRICTLY as a JSON array of strings. Do not add any text before or after the JSON array.
+Example response for user input "Frontend": ["React vs Vue", "CSS Animations", "Web Accessibility", "Modern JS Frameworks"]`
+    : `Ты — креативный ассистент. Пользователь вводит тему для викторины или теста. Твоя задача — предложить список из 3-5 интересных и релевантных тем на основе его ввода.
+Ввод пользователя: "${query}"
+Проанализируй ввод, чтобы понять тему и настроение (например, "техническое", "историческое", "юмористическое").
+Сгенерируй список из 3-5 связанных тем, которые соответствуют этой теме и настроению.
+Каждая предложенная тема должна быть короткой и лаконичной (максимум 3-4 слова).
+Верни ответ СТРОГО в виде JSON-массива строк. Не добавляй никакого текста до или после JSON-массива.
+Пример ответа для ввода "Frontend": ["React vs Vue", "CSS-анимации", "Веб-доступность", "Современные JS фреймворки"]`;
+    
+  try {
+    const response: GenerateContentResponse = await ai.models.generateContent({
+      model: 'gemini-1.5-flash',
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        temperature: 0.6, // Higher temperature for more creative suggestions
+        maxOutputTokens: 200,
+      }
+    });
+    
+    const parsedData = parseJsonFromText<string[]>(response.text || '', 'getTopicSuggestion');
+    
+    if (!parsedData || !Array.isArray(parsedData)) {
+        console.error("AI suggestion response is not a valid array:", parsedData);
+        return [];
+    }
+
+    return parsedData.filter(item => typeof item === 'string');
+
+  } catch (error) {
+    console.error("Error getting topic suggestion:", error);
+    return []; 
+  }
+};
+
 const getFeedbackPrompts = (language: string) => {
   if (language === 'en') {
-    return (questionText: string, correctAnswer: string, userAnswer: string, topic: string) => `
+    return (questionText
+    : string, correctAnswer: string, userAnswer: string, topic: string) => `
 Act as an experienced interviewer and expert in the field of "${topic}".
 You are provided with a question, reference answer (for your information) and candidate's answer.
 Your task is to evaluate the candidate's answer in English and provide two types of feedback: brief and detailed. Don't be too strict, but not too lenient either. If the user answered with one word but it's correct, don't criticize them.
