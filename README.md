@@ -1,161 +1,186 @@
-# AI Interview Coach 🤖💼
+ # AI Interview Coach 🤖💼
 
-**Ваш ИИ-тренер для подготовки к техническим собеседованиям**
+**Your AI-powered trainer for technical interview preparation**
 
-## Описание
+## Description
 
-AI Interview Coach - это интерактивное веб-приложение, которое помогает подготовиться к техническим собеседованиям с использованием искусственного интеллекта Google Gemini. Приложение генерирует вопросы по различным IT-темам и предоставляет детальную обратную связь по вашим ответам.
+AI Interview Coach is an interactive web application that helps you prepare for technical interviews using Google Gemini artificial intelligence. The application generates questions on various IT topics and provides detailed feedback on your answers.
 
-## Функционал
+## Features
 
-### 🎯 Основные возможности
-- **Персонализированные вопросы**: Генерация вопросов по выбранной теме и уровню сложности
-- **Интеллектуальная оценка**: ИИ анализирует ваши ответы и дает подробную обратную связь
-- **Удобный интерфейс**: Карточки с вопросами, которые можно пролистывать свайпами
-- **Голосовой ввод**: Возможность отвечать на вопросы голосом
-- **Сводка сессии**: Подробный отчет по всем отвеченным вопросам
+### 🎯 Core Capabilities
+- **Personalized Questions**: Generate questions based on selected topic and difficulty level
+- **Intelligent Assessment**: AI analyzes your answers and provides detailed feedback
+- **User-friendly Interface**: Question cards that can be swiped through
+- **Voice Input**: Ability to answer questions using voice recognition
+- **Session Summary**: Detailed report of all answered questions
+- **🌐 Multilingual Support**: Full internationalization with English and Russian languages
 
-### 📚 Поддерживаемые темы
-- Java
-- Python 
-- JavaScript
-- Алгоритмы и структуры данных
-- Базы данных (SQL)
-- Теория тестирования ПО
-- Frontend разработка
-- Backend разработка
-- Возможность указать свою тему
+### 🌍 Language Support
+- **Automatic Language Detection**: Detects browser language and sets it as default
+- **Seamless Language Switching**: Toggle between languages without page reload
+- **Localized AI Content**: Questions and feedback generated in your preferred language
+- **Persistent Language Preference**: Remembers your language choice
 
-### 🎓 Уровни сложности
-- **Junior** (Джуниор) - для начинающих разработчиков
-- **Middle** (Мидл) - для разработчиков среднего уровня
-- **Senior** (Сеньор) - для опытных разработчиков
+### 📚 Supported Topics
+- **Frontend Development**: React, JavaScript, CSS, HTML
+- **Backend Development**: Node.js, APIs, Server Architecture
+- **Full-stack Development**: End-to-end application development
+- **DevOps**: CI/CD, Docker, Cloud platforms
+- **Mobile Development**: iOS, Android, React Native
+- **Data Science**: Data analysis, visualization, statistics
+- **Machine Learning**: ML algorithms, neural networks
+- **Algorithms & Data Structures**: Core computer science concepts
+- **Databases**: SQL, NoSQL, database design
+- **Software Testing**: Testing methodologies and frameworks
+- **Custom Topics**: Specify your own topic for personalized questions
 
-## Технологии
+### 🎓 Difficulty Levels
+- **Junior** - For entry-level developers
+- **Middle** - For mid-level developers  
+- **Senior** - For experienced developers
+
+## Technologies
 
 - **Frontend**: React 19 + TypeScript + Vite
-- **ИИ**: Google Gemini API
-- **Дополнительные библиотеки**: 
-  - React Markdown для рендеринга обратной связи
-  - React Swipeable для жестов
-  - Web Speech API для голосового ввода
+- **AI**: Google Gemini API
+- **Internationalization**: react-i18next, i18next
+- **Additional Libraries**: 
+  - React Markdown for feedback rendering
+  - Web Speech API for voice input
+  - i18next-browser-languagedetector for automatic language detection
 
-## Установка и запуск
+## Installation and Setup
 
-### Предварительные требования
-- Node.js (версия 16 или выше)
-- Gemini API ключ от Google
+### Prerequisites
+- Node.js (version 16 or higher)
+- Gemini API key from Google
 
-### Шаги установки
+### Installation Steps
 
-1. **Клонирование репозитория**
+1. **Clone the repository**
    ```bash
-   git clone <url-репозитория>
+   git clone <repository-url>
    cd ai-interview-coach
    ```
 
-2. **Установка зависимостей**
+2. **Install dependencies**
    ```bash
    npm install
    ```
 
-3. **Настройка API ключа**
-   - Создайте файл `.env.local` в корне проекта
-   - Добавьте ваш Gemini API ключ:
+3. **Configure API key**
+   - Create `.env.local` file in the project root
+   - Add your Gemini API key:
      ```
-     VITE_API_KEY=ваш_gemini_api_ключ_здесь
+     VITE_API_KEY=your_gemini_api_key_here
      ```
 
-4. **Запуск приложения**
+4. **Start the application**
    ```bash
    npm run dev -- --host
    ```
 
-5. **Откройте в браузере**
-   - Локально: `http://localhost:5173`
-   - В сети: `http://192.168.1.171:5173` (для доступа с мобильных устройств)
-   - Через ngrok: `https://23c2-109-92-81-119.ngrok-free.app`
+5. **Open in browser**
+   - Locally: `http://localhost:5173`
+   - Network: `http://192.168.1.171:5173` (for mobile device access)
 
-## 🌐 Доступ через ngrok
+## Getting Gemini API Key
 
-Для демонстрации приложения через интернет:
+1. Go to [Google AI Studio](https://aistudio.google.com/)
+2. Sign in with your Google account
+3. Create a new API key
+4. Copy the key and add it to `.env.local`
 
-1. **Установите ngrok** (если не установлен):
-   ```bash
-   brew install ngrok  # macOS
-   # или скачайте с https://ngrok.com/
-   ```
-
-2. **Запустите туннель:**
-   ```bash
-   ngrok http 5173
-   ```
-
-3. **Используйте HTTPS URL** из вывода ngrok для доступа к приложению из любой точки мира
-
-## Получение Gemini API ключа
-
-1. Перейдите на [Google AI Studio](https://aistudio.google.com/)
-2. Войдите в свой Google аккаунт
-3. Создайте новый API ключ
-4. Скопируйте ключ и добавьте его в `.env.local`
-
-## Структура проекта
+## Project Structure
 
 ```
 ai-interview-coach/
 ├── src/
-│   ├── components/          # React компоненты
-│   │   ├── SetupScreen.tsx  # Экран настройки сессии
-│   │   ├── QuestionSwiper.tsx # Карусель вопросов
-│   │   ├── SummaryScreen.tsx # Экран сводки
+│   ├── components/          # React components
+│   │   ├── SetupScreen.tsx  # Session setup screen
+│   │   ├── QuestionSwiper.tsx # Question carousel
+│   │   ├── SummaryScreen.tsx # Summary screen
+│   │   ├── LanguageToggle.tsx # Language switcher
 │   │   └── ...
-│   ├── services/            # Сервисы
-│   │   └── geminiService.ts # Работа с Gemini API
-│   ├── types.ts            # TypeScript типы
-│   ├── constants.ts        # Константы приложения
-│   └── App.tsx            # Главный компонент
-├── .env.local             # Переменные окружения (создать)
-├── package.json           # Зависимости
-└── README.md             # Документация
+│   ├── services/            # Services
+│   │   └── geminiService.ts # Gemini API integration
+│   ├── hooks/              # Custom hooks
+│   │   ├── useLanguage.ts  # Language management
+│   │   └── useConstants.ts # Dynamic constants
+│   ├── i18n/               # Internationalization
+│   │   └── index.ts        # i18n configuration
+│   ├── types.ts            # TypeScript types
+│   ├── constants.ts        # Application constants
+│   └── App.tsx            # Main component
+├── locales/                # Translation files
+│   ├── en/                 # English translations
+│   │   └── common.json
+│   └── ru/                 # Russian translations
+│       └── common.json
+├── .env.local             # Environment variables (create)
+├── package.json           # Dependencies
+└── README.md             # Documentation
 ```
 
-## Скрипты
+## Scripts
 
-- `npm run dev` - Запуск в режиме разработки
-- `npm run build` - Сборка для продакшена
-- `npm run preview` - Предварительный просмотр сборки
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
 
-## Как использовать
+## How to Use
 
-1. **Настройка сессии**: Выберите тему и уровень сложности
-2. **Ответы на вопросы**: Отвечайте на вопросы текстом или голосом
-3. **Получение обратной связи**: Нажмите "Проверить ответ" для получения оценки
-4. **Переход к следующему вопросу**: Свайпните или нажмите "Следующий вопрос"
-5. **Завершение сессии**: Просмотрите сводку всех вопросов и ответов
+1. **Session Setup**: Choose topic and difficulty level
+2. **Language Selection**: The app automatically detects your browser language, or you can manually switch using the language toggle
+3. **Answer Questions**: Respond to questions with text or voice input
+4. **Get Feedback**: Click "Check Answer" to receive AI evaluation
+5. **Navigate**: Swipe or use buttons to move between questions
+6. **Complete Session**: Review summary of all questions and answers
 
-## Возможности интерфейса
+## Interface Features
 
-- **Свайпы**: Листайте вопросы влево/вправо
-- **Голосовой ввод**: Кнопка микрофона для записи ответа
-- **Спойлеры**: Кликабельные разделы для показа/скрытия информации
-- **Адаптивный дизайн**: Работает на мобильных устройствах
+- **Swipe Navigation**: Swipe left/right to navigate between questions
+- **Voice Input**: Microphone button for voice recording
+- **Expandable Sections**: Clickable sections to show/hide information
+- **Responsive Design**: Works on mobile devices
+- **Language Toggle**: Switch between supported languages instantly
+- **Theme Support**: Light and dark theme options
 
-## Лицензия
+## Internationalization
 
-Проект создан для образовательных целей.
+The application supports multiple languages with:
 
-## Вклад в проект
+- **Automatic Detection**: Browser language detection on first visit
+- **Manual Switching**: Language toggle component in the header
+- **Persistent Preference**: Language choice saved in localStorage
+- **AI Localization**: Questions and feedback generated in selected language
+- **UI Translation**: Complete interface translation
 
-Если вы хотите внести свой вклад в развитие проекта:
-1. Создайте форк репозитория
-2. Создайте ветку с вашими изменениями
-3. Отправьте Pull Request
+### Adding New Languages
 
-## Поддержка
+To add support for a new language:
 
-Если у вас возникли проблемы или вопросы, создайте Issue в репозитории.
+1. Create translation file in `locales/[language-code]/common.json`
+2. Add language support in `src/hooks/useLanguage.ts`
+3. Update language detection in `src/i18n/index.ts`
+4. Add language-specific prompts in `services/geminiService.ts`
+
+## License
+
+This project is created for educational purposes.
+
+## Contributing
+
+If you want to contribute to the project:
+1. Fork the repository
+2. Create a branch with your changes
+3. Submit a Pull Request
+
+## Support
+
+If you encounter issues or have questions, please create an Issue in the repository.
 
 ---
 
-**Удачной подготовки к собеседованиям! 🚀**
+**Good luck with your interview preparation! 🚀**
