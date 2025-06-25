@@ -1,0 +1,112 @@
+{
+  "app": {
+    "title": "AI Interview Coach",
+    "subtitle": "Собеседованиеларга әзерләнү тренажеры",
+    "poweredBy": "Gemini API нигезендә"
+  },
+  "navigation": {
+    "back": "Кире",
+    "next": "Алга",
+    "finish": "Тәмамлау",
+    "results": "Нәтиҗәләр",
+    "newSession": "Яңа сессия"
+  },
+  "setup": {
+    "title": "Сессияне көйләгез",
+    "description": "Әзерләнү башлау өчен тема һәм катлаулык дәрәҗәсен сайлагыз",
+    "topicLabel": "Сорау темасы",
+    "difficultyLabel": "Катлаулык дәрәҗәсен сайлагыз",
+    "customTopicLabel": "Яки үз темагызны кертегез",
+    "customTopicPlaceholder": "мәсәлән, 'React Hooks өчен иң яхшы практикалар'",
+    "startButton": "Интервью башлау",
+    "aiSuggestion": "AI тәкъдим итә:",
+    "startTypingToFilter": "Темаларны фильтрлау өчен язып башлагыз...",
+    "errors": {
+      "topicRequired": "Зинһар, үз темагызны кертегез.",
+      "topicNotSelected": "Зинһар, тема сайлагыз яки кертегез."
+    }
+  },
+  "questions": {
+    "loading": "Сезнең өчен сораулар ясыйбыз...",
+    "loadingSubtext": "Бу берничә секунд алырга мөмкин",
+    "loadingQuestions": "Сораулар йөкләү...",
+    "loadingMore": "тагын йөкләүче...",
+    "loadingNewQuestions": "Яңа сораулар йөкләү...",
+    "loadingStatus": {
+      "analyzing": "Теманы анализлыйбыз...",
+      "generating": "Сораулар ясыйбыз...",
+      "preparing": "Материаллар әзерлибез...",
+      "almostReady": "Диярлек әзер..."
+    },
+    "questionProgress": "{{current}} сорау {{total}} дән",
+    "viewResults": "Нәтиҗәләрне карау",
+    "yourAnswer": "Сезнең җавабыгыз:",
+    "answerPlaceholder": "Җавабыгызны монда кертегез...",
+    "checkAnswer": "Җавапны тикшерү",
+    "checking": "Җавапны тикшерәбез...",
+    "correctAnswer": "Дөрес җавап:",
+    "shortFeedback": "Кыска бәяләү:",
+    "detailedFeedback": "Җентекле фикер алышу",
+    "showAnswer": "Җавап",
+    "speechRecognition": {
+      "start": "Тавыш кертүне башлау",
+      "stop": "Язуны туктату",
+      "notSupported": "Тавыш кертү сезнең браузерда ярдәм итми"
+    }
+  },
+  "results": {
+    "title": "Сессия нәтиҗәләре",
+    "topic": "Тема",
+    "difficulty": "Катлаулык",
+    "noAnswers": "Сез бу сессиядә бер сорауга да җавап бирмәдегез.",
+    "tryAgain": "Сессияне тагын бер тапкыр үтәргә тырышыгыз!",
+    "questionNumber": "Сорау",
+    "fullQuestion": "Тулы сорау:",
+    "yourAnswer": "Сезнең җавабыгыз:",
+    "noAnswerGiven": "Җавап бирелмәде.",
+    "correctAnswer": "Эталон җавап",
+    "shortFeedback": "Кыска фикер алышу:",
+    "detailedFeedback": "Җентекле фикер алышу",
+    "backToQuestions": "Сорауларга кире",
+    "newSession": "Яңа сессия башлау",
+    "exportResults": "Нәтиҗәләрне экспортлау",
+    "noDataToExport": "Экспортлау өчен мәгълүмат юк."
+  },
+  "theme": {
+    "light": "Якты",
+    "dark": "Караңгы",
+    "system": "Система",
+    "tooltip": "Хәзерге тема: {{theme}}. Алыштыру өчен басыгыз"
+  },
+  "language": {
+    "tooltip": "Хәзерге тел: {{language}}. Алыштыру өчен басыгыз"
+  },
+  "topics": {
+    "frontend": "Frontend эшләү",
+    "backend": "Backend эшләү",
+    "fullstack": "Fullstack эшләү",
+    "devops": "DevOps",
+    "mobile": "Мобиль эшләү",
+    "data_science": "Data Science",
+    "machine_learning": "Machine Learning",
+    "product_management": "Product Management",
+    "design": "UI/UX Design",
+    "qa": "Quality Assurance",
+    "custom": "Үз темасы"
+  },
+  "difficulties": {
+    "junior": "Junior",
+    "middle": "Middle",
+    "senior": "Senior"
+  },
+  "common": {
+    "close": "Ябу",
+    "error": "Хата",
+    "loading": "Йөкләү...",
+    "retry": "Кабатлау",
+    "cancel": "Баш тарту",
+    "confirm": "Раслау",
+    "save": "Саклау",
+    "noResultsFound": "Нәтиҗәләр табылмады"
+  }
+} 

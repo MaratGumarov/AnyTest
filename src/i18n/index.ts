@@ -5,6 +5,7 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 // Import translation files
 import enCommon from '../../locales/en/common.json';
 import ruCommon from '../../locales/ru/common.json';
+import ttCommon from '../../locales/tt/common.json';
 
 const resources = {
   en: {
@@ -12,6 +13,9 @@ const resources = {
   },
   ru: {
     common: ruCommon,
+  },
+  tt: {
+    common: ttCommon,
   },
 };
 

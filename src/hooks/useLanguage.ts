@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next';
 
-export type Language = 'en' | 'ru';
+export type Language = 'en' | 'ru' | 'tt';
 
-const LANGUAGES: Language[] = ['en', 'ru'];
+const LANGUAGES: Language[] = ['en', 'ru', 'tt'];
 
 export function useLanguage() {
   const { i18n } = useTranslation();
@@ -23,6 +23,7 @@ export function useLanguage() {
     const names = {
       en: 'English',
       ru: 'Русский',
+      tt: 'Татарча',
     };
     return names[lang];
   };
