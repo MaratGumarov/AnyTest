@@ -427,10 +427,11 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
           variant="primary"
           size="md"
           onClick={onViewResults}
-          leftIcon={<ListBulletIcon className="w-5 h-5" />}
-          className="w-14 h-14 p-0 rounded-full shadow-lg hover:shadow-xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 dark:from-violet-500 dark:to-purple-600 dark:hover:from-violet-600 dark:hover:to-purple-700 border-0 transform hover:scale-105 transition-all duration-200"
+          className="w-14 h-14 p-0 rounded-full shadow-lg hover:shadow-xl bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 dark:from-violet-500 dark:to-purple-600 dark:hover:from-violet-600 dark:hover:to-purple-700 border-0 transform hover:scale-105 transition-all duration-200 flex items-center justify-center"
           title={t('questions.viewResults')}
-        />
+        >
+          <ListBulletIcon className="w-5 h-5" />
+        </Button>
       </div>
     </div>
   );
