@@ -9,7 +9,8 @@ export const DIFFICULTY_LEVELS = [
   { value: Difficulty.SENIOR, label: 'Senior (Сеньор)' },
 ];
 
-export const GEMINI_MODEL_TEXT = 'gemini-2.5-flash-preview-04-17';
+// export const GEMINI_MODEL_TEXT = 'gemini-2.5-flash-preview-04-17';
+export const GEMINI_MODEL_TEXT = 'gemini-2.5-flash-lite-preview-06-17';
 
 export const CUSTOM_TOPIC_VALUE = 'CUSTOM_TOPIC_VALUE_INTERNAL'; // Internal value to identify custom topic choice
 

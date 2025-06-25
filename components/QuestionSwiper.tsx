@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { QuestionItem, SpeechRecognitionState } from '../types';
 import QuestionDisplayCard from './QuestionDisplayCard';
 import useSpeechRecognition from '../hooks/useSpeechRecognition';
-import { LoadingSpinner, ListBulletIcon } from './icons';
+import { LoadingSpinner, ListBulletIcon, ArrowLeftIcon, ArrowRightIcon } from './icons';
 import { Button } from './ui';
 
 interface QuestionSwiperProps {
@@ -32,10 +32,36 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
   const speechRecognition = useSpeechRecognition();
   const containerRef = useRef<HTMLDivElement>(null);
   const questionsRefs = useRef<(HTMLDivElement | null)[]>([]);
+  
+  // Состояние для анимации подсказки свайпа
+  const [showSwipeHint, setShowSwipeHint] = useState(false);
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+  const hintTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastInteractionRef = useRef<number>(Date.now());
+  
+  // Состояние для отслеживания размера экрана
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  // Отслеживание размера экрана
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+
 
   // Синхронизация с внешним индексом
   useEffect(() => {
     setCurrentIndex(startIndex);
+    // Сбрасываем подсказку при программном изменении индекса
+    setShowSwipeHint(false);
+    lastInteractionRef.current = Date.now();
   }, [startIndex]);
 
   // Автозагрузка новых вопросов при приближении к концу
@@ -56,6 +82,17 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
     
     if (newIndex !== currentIndex && newIndex >= 0 && newIndex < questions.length) {
       setCurrentIndex(newIndex);
+    }
+    
+    // Отмечаем пользовательское взаимодействие
+    setHasUserInteracted(true);
+    lastInteractionRef.current = Date.now();
+    setShowSwipeHint(false);
+    
+    // Очищаем таймер подсказки
+    if (hintTimeoutRef.current) {
+      clearTimeout(hintTimeoutRef.current);
+      hintTimeoutRef.current = null;
     }
   }, [currentIndex, questions.length]);
 
@@ -86,6 +123,155 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
   useEffect(() => {
     scrollToQuestion(startIndex);
   }, [startIndex, scrollToQuestion]);
+
+  // Функции навигации
+  const goToPrevious = useCallback(() => {
+    if (currentIndex > 0) {
+      setHasUserInteracted(true);
+      setShowSwipeHint(false);
+      scrollToQuestion(currentIndex - 1);
+    }
+  }, [currentIndex, scrollToQuestion]);
+
+  const goToNext = useCallback(() => {
+    if (currentIndex < questions.length - 1) {
+      setHasUserInteracted(true);
+      setShowSwipeHint(false);
+      scrollToQuestion(currentIndex + 1);
+    }
+  }, [currentIndex, questions.length, scrollToQuestion]);
+
+  // Функция для показа анимации подсказки свайпа
+  const showSwipeHintAnimation = useCallback(() => {
+    if (!containerRef.current || hasUserInteracted || questions.length <= 1) return;
+    
+    const container = containerRef.current;
+    const containerWidth = container.clientWidth;
+    
+    // Определяем направление подсказки (вправо если есть следующая карточка, влево если есть предыдущая)
+    const canSwipeRight = currentIndex < questions.length - 1;
+    const canSwipeLeft = currentIndex > 0;
+    
+    if (!canSwipeRight && !canSwipeLeft) return;
+    
+    console.log('Starting swipe hint animation', { currentIndex, canSwipeRight, canSwipeLeft });
+    setShowSwipeHint(true);
+    
+    // Вычисляем текущую позицию карточки
+    const currentCardPosition = currentIndex * containerWidth;
+    
+    // Выбираем направление (приоритет вправо)
+    const direction = canSwipeRight ? 'right' : 'left';
+    
+    // Адаптивный offset в зависимости от размера экрана
+    // На мобильных устройствах меньше offset, на десктопе больше
+    const isMobile = containerWidth < 768;
+    const hintOffset = isMobile 
+      ? containerWidth * 0.25  // 25% на мобилке
+      : containerWidth * 0.35; // 35% на десктопе для лучшей видимости края
+    
+    const targetScrollLeft = direction === 'right' 
+      ? currentCardPosition + hintOffset 
+      : currentCardPosition - hintOffset;
+    
+    console.log('Animation params:', { 
+      currentCardPosition, 
+      targetScrollLeft, 
+      direction, 
+      containerWidth,
+      isMobile,
+      hintOffset,
+      currentScrollLeft: container.scrollLeft 
+    });
+    
+    // Временно отключаем snap для плавной анимации
+    container.style.scrollSnapType = 'none';
+    container.style.transition = 'scroll-behavior 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+    
+    // Анимация подсказки с более плавным easing
+    container.scrollTo({
+      left: targetScrollLeft,
+      behavior: 'smooth'
+    });
+    
+    // Возвращаем обратно через 800мс (быстрее)
+    setTimeout(() => {
+      if (containerRef.current && !hasUserInteracted) {
+        console.log('Returning to original position');
+        container.scrollTo({
+          left: currentCardPosition,
+          behavior: 'smooth'
+        });
+        
+        // Возвращаем snap через небольшую задержку
+        setTimeout(() => {
+          if (containerRef.current) {
+            container.style.scrollSnapType = 'x mandatory';
+            container.style.transition = '';
+            setShowSwipeHint(false);
+          }
+        }, 400);
+      }
+    }, 800);
+  }, [currentIndex, hasUserInteracted, questions.length]);
+
+  // Эффект для запуска анимации подсказки через 3 секунды простоя
+  useEffect(() => {
+    if (hasUserInteracted || questions.length <= 1) {
+      console.log('Hint disabled:', { hasUserInteracted, questionsLength: questions.length });
+      return;
+    }
+    
+    console.log('Scheduling hint for index:', currentIndex);
+    
+    const scheduleHint = () => {
+      if (hintTimeoutRef.current) {
+        clearTimeout(hintTimeoutRef.current);
+      }
+      
+      hintTimeoutRef.current = setTimeout(() => {
+        const timeSinceLastInteraction = Date.now() - lastInteractionRef.current;
+        console.log('Hint timeout triggered:', { timeSinceLastInteraction, hasUserInteracted });
+        if (timeSinceLastInteraction >= 3000 && !hasUserInteracted) {
+          showSwipeHintAnimation();
+        }
+      }, 3000);
+    };
+    
+    scheduleHint();
+    
+    return () => {
+      if (hintTimeoutRef.current) {
+        clearTimeout(hintTimeoutRef.current);
+        hintTimeoutRef.current = null;
+      }
+    };
+  }, [currentIndex, hasUserInteracted, showSwipeHintAnimation, questions.length]);
+
+  // Отслеживание touch событий для определения пользовательского взаимодействия
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleTouchStart = () => {
+      setHasUserInteracted(true);
+      lastInteractionRef.current = Date.now();
+      setShowSwipeHint(false);
+      
+      if (hintTimeoutRef.current) {
+        clearTimeout(hintTimeoutRef.current);
+        hintTimeoutRef.current = null;
+      }
+    };
+
+    container.addEventListener('touchstart', handleTouchStart, { passive: true });
+    container.addEventListener('mousedown', handleTouchStart, { passive: true });
+    
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('mousedown', handleTouchStart);
+    };
+  }, []);
 
 
 
@@ -123,16 +309,64 @@ const QuestionSwiper: React.FC<QuestionSwiperProps> = ({
         </div>
       </div>
 
+      {/* Стрелки навигации для десктопа - зафиксированы относительно экрана */}
+      {isDesktop && (
+        <>
+          {/* Левая стрелка */}
+          {currentIndex > 0 && (
+            <button
+              onClick={goToPrevious}
+              className="fixed left-6 top-1/2 transform -translate-y-1/2 z-30 
+                        bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm
+                        hover:bg-white dark:hover:bg-slate-800 
+                        border border-slate-200 dark:border-slate-600
+                        rounded-full p-3 shadow-lg hover:shadow-xl
+                        transition-all duration-200 ease-out
+                        hover:scale-110 active:scale-95"
+              title="Предыдущий вопрос"
+            >
+              <ArrowLeftIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+            </button>
+          )}
+          
+          {/* Правая стрелка */}
+          {currentIndex < questions.length - 1 && (
+            <button
+              onClick={goToNext}
+              className="fixed right-6 top-1/2 transform -translate-y-1/2 z-30 
+                        bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm
+                        hover:bg-white dark:hover:bg-slate-800 
+                        border border-slate-200 dark:border-slate-600
+                        rounded-full p-3 shadow-lg hover:shadow-xl
+                        transition-all duration-200 ease-out
+                        hover:scale-110 active:scale-95"
+              title="Следующий вопрос"
+            >
+              <ArrowRightIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+            </button>
+          )}
+        </>
+      )}
+
       {/* Container with horizontal snap scroll */}
       <div 
         ref={containerRef}
-        className="flex-1 overflow-x-auto overflow-y-hidden snap-x-container"
+        className="flex-1 overflow-x-auto overflow-y-hidden snap-x-container relative"
         style={{
           scrollSnapType: 'x mandatory',
           scrollBehavior: 'smooth',
           WebkitOverflowScrolling: 'touch'
         }}
       >
+
+        {/* Тонкая подсказка во время анимации */}
+        {showSwipeHint && (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-none">
+            <div className="bg-black/10 dark:bg-white/10 backdrop-blur-md rounded-full px-3 py-1.5 text-slate-700 dark:text-slate-300 text-xs font-medium animate-pulse border border-white/20">
+              ← Свайп →
+            </div>
+          </div>
+        )}
         <div className="flex h-full" style={{ width: `${questions.length * 100}%` }}>
           {questions.map((question, index) => (
             <div

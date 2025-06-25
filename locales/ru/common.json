@@ -32,6 +32,12 @@
     "loadingQuestions": "Загрузка вопросов...",
     "loadingMore": "загружаем ещё...",
     "loadingNewQuestions": "Загружаем новые вопросы...",
+    "loadingStatus": {
+      "analyzing": "Анализируем тему...",
+      "generating": "Генерируем вопросы...",
+      "preparing": "Готовим материалы...",
+      "almostReady": "Почти готово..."
+    },
     "questionProgress": "Вопрос {{current}} из {{total}}",
     "viewResults": "Посмотреть результаты",
     "yourAnswer": "Ваш ответ:",

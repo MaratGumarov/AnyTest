@@ -5,6 +5,7 @@ import { generateQuestions } from './services/geminiService';
 import SetupScreen from './components/SetupScreen';
 import QuestionSwiper from './components/QuestionSwiper';
 import SummaryScreen from './components/SummaryScreen';
+import LoadingScreen from './components/LoadingScreen';
 import { LoadingSpinner } from './components/icons';
 import { Button } from './components/ui';
 import ThemeToggle from './components/ThemeToggle';
@@ -19,6 +20,7 @@ function App() {
   const [questions, setQuestions] = useState<QuestionItem[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingStartTime, setLoadingStartTime] = useState(0);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [hasMoreQuestionsToLoad, setHasMoreQuestionsToLoad] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +54,7 @@ function App() {
     setConfig(interviewConfig);
     setError(null);
     setIsLoading(true);
+    setLoadingStartTime(Date.now());
     setHasMoreQuestionsToLoad(true);
 
     try {
@@ -115,19 +118,7 @@ function App() {
 
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:via-purple-900 dark:to-violet-800 flex items-center justify-center">
-        <div className="text-center">
-          <LoadingSpinner className="w-16 h-16 mb-4 mx-auto" />
-          <p className="text-xl text-slate-800 dark:text-slate-400">
-            {t('questions.loading')}
-          </p>
-          <p className="text-sm text-slate-600 dark:text-slate-500 mt-2">
-            {t('questions.loadingSubtext')}
-          </p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen startTime={loadingStartTime} />;
   }
 
   return (

@@ -32,6 +32,12 @@
     "loadingQuestions": "Loading questions...",
     "loadingMore": "loading more...",
     "loadingNewQuestions": "Loading new questions...",
+    "loadingStatus": {
+      "analyzing": "Analyzing topic...",
+      "generating": "Generating questions...",
+      "preparing": "Preparing materials...",
+      "almostReady": "Almost ready..."
+    },
     "questionProgress": "Question {{current}} of {{total}}",
     "viewResults": "View results",
     "yourAnswer": "Your answer:",
