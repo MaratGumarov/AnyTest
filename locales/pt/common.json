@@ -1,0 +1,112 @@
+{
+  "app": {
+    "title": "AI Treinador de Entrevistas",
+    "subtitle": "Treinador de preparação para entrevistas",
+    "poweredBy": "Desenvolvido com Gemini API"
+  },
+  "navigation": {
+    "back": "Voltar",
+    "next": "Próximo",
+    "finish": "Finalizar",
+    "results": "Resultados",
+    "newSession": "Nova sessão"
+  },
+  "setup": {
+    "title": "Configurar sua sessão",
+    "description": "Escolha um tópico e dificuldade para começar sua preparação",
+    "topicLabel": "Tópico das perguntas",
+    "difficultyLabel": "Nível de dificuldade",
+    "customTopicLabel": "Especifique seu tópico",
+    "customTopicPlaceholder": "ex., História Medieval",
+    "startButton": "Iniciar sessão",
+    "aiSuggestion": "Sugestão da IA:",
+    "startTypingToFilter": "Comece a digitar para filtrar tópicos...",
+    "errors": {
+      "topicRequired": "Por favor, insira um nome para seu tópico personalizado.",
+      "topicNotSelected": "Nenhum tópico selecionado. Por favor, escolha ou especifique um tópico."
+    }
+  },
+  "questions": {
+    "loading": "Gerando perguntas para você...",
+    "loadingSubtext": "Isso pode levar alguns segundos",
+    "loadingQuestions": "Carregando perguntas...",
+    "loadingMore": "carregando mais...",
+    "loadingNewQuestions": "Carregando novas perguntas...",
+    "loadingStatus": {
+      "analyzing": "Analisando tópico...",
+      "generating": "Gerando perguntas...",
+      "preparing": "Preparando materiais...",
+      "almostReady": "Quase pronto..."
+    },
+    "questionProgress": "Pergunta {{current}} de {{total}}",
+    "viewResults": "Ver resultados",
+    "yourAnswer": "Sua resposta:",
+    "answerPlaceholder": "Digite sua resposta aqui...",
+    "checkAnswer": "Verificar resposta",
+    "checking": "Verificando resposta...",
+    "correctAnswer": "Resposta correta:",
+    "shortFeedback": "Avaliação breve:",
+    "detailedFeedback": "Feedback detalhado",
+    "showAnswer": "Resposta",
+    "speechRecognition": {
+      "start": "Iniciar entrada de voz",
+      "stop": "Parar gravação",
+      "notSupported": "Reconhecimento de fala não é suportado no seu navegador"
+    }
+  },
+  "results": {
+    "title": "Resultados da sessão",
+    "topic": "Tópico",
+    "difficulty": "Dificuldade",
+    "noAnswers": "Você não respondeu nenhuma pergunta nesta sessão.",
+    "tryAgain": "Tente fazer a sessão novamente!",
+    "questionNumber": "Pergunta",
+    "fullQuestion": "Pergunta completa:",
+    "yourAnswer": "Sua resposta:",
+    "noAnswerGiven": "Nenhuma resposta foi dada.",
+    "correctAnswer": "Resposta de referência",
+    "shortFeedback": "Feedback breve:",
+    "detailedFeedback": "Feedback detalhado",
+    "backToQuestions": "Voltar às perguntas",
+    "newSession": "Iniciar nova sessão",
+    "exportResults": "Exportar resultados",
+    "noDataToExport": "Nenhum dado para exportar."
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema",
+    "tooltip": "Tema atual: {{theme}}. Clique para alternar"
+  },
+  "language": {
+    "tooltip": "Idioma atual: {{language}}. Clique para alternar"
+  },
+  "topics": {
+    "frontend": "Desenvolvimento Frontend",
+    "backend": "Desenvolvimento Backend",
+    "fullstack": "Desenvolvimento Fullstack",
+    "devops": "DevOps",
+    "mobile": "Desenvolvimento Mobile",
+    "data_science": "Ciência de Dados",
+    "machine_learning": "Aprendizado de Máquina",
+    "product_management": "Gestão de Produtos",
+    "design": "Design UI/UX",
+    "qa": "Garantia de Qualidade",
+    "custom": "Tópico personalizado"
+  },
+  "difficulties": {
+    "junior": "Júnior",
+    "middle": "Pleno",
+    "senior": "Sênior"
+  },
+  "common": {
+    "close": "Fechar",
+    "error": "Erro",
+    "loading": "Carregando...",
+    "retry": "Tentar novamente",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "save": "Salvar",
+    "noResultsFound": "Nenhum resultado encontrado"
+  }
+} 

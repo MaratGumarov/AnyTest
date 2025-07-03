@@ -1,0 +1,112 @@
+{
+  "app": {
+    "title": "AI Тренер Співбесід",
+    "subtitle": "Тренажер підготовки до співбесід",
+    "poweredBy": "Працює на Gemini API"
+  },
+  "navigation": {
+    "back": "Назад",
+    "next": "Далі",
+    "finish": "Завершити",
+    "results": "Результати",
+    "newSession": "Нова сесія"
+  },
+  "setup": {
+    "title": "Налаштування сесії",
+    "description": "Оберіть тему та складність для початку підготовки",
+    "topicLabel": "Тема питань",
+    "difficultyLabel": "Рівень складності",
+    "customTopicLabel": "Вкажіть вашу тему",
+    "customTopicPlaceholder": "наприклад, Середньовічна історія",
+    "startButton": "Почати сесію",
+    "aiSuggestion": "Пропозиція ШІ:",
+    "startTypingToFilter": "Почніть вводити для фільтрації тем...",
+    "errors": {
+      "topicRequired": "Будь ласка, введіть назву для вашої користувацької теми.",
+      "topicNotSelected": "Тему не обрано. Будь ласка, оберіть або вкажіть тему."
+    }
+  },
+  "questions": {
+    "loading": "Генеруємо питання для вас...",
+    "loadingSubtext": "Це може зайняти кілька секунд",
+    "loadingQuestions": "Завантажуємо питання...",
+    "loadingMore": "завантажуємо ще...",
+    "loadingNewQuestions": "Завантажуємо нові питання...",
+    "loadingStatus": {
+      "analyzing": "Аналізуємо тему...",
+      "generating": "Генеруємо питання...",
+      "preparing": "Готуємо матеріали...",
+      "almostReady": "Майже готово..."
+    },
+    "questionProgress": "Питання {{current}} з {{total}}",
+    "viewResults": "Переглянути результати",
+    "yourAnswer": "Ваша відповідь:",
+    "answerPlaceholder": "Введіть вашу відповідь тут...",
+    "checkAnswer": "Перевірити відповідь",
+    "checking": "Перевіряємо відповідь...",
+    "correctAnswer": "Правильна відповідь:",
+    "shortFeedback": "Коротка оцінка:",
+    "detailedFeedback": "Детальний відгук",
+    "showAnswer": "Відповідь",
+    "speechRecognition": {
+      "start": "Розпочати голосовий ввід",
+      "stop": "Зупинити запис",
+      "notSupported": "Розпізнавання мовлення не підтримується у вашому браузері"
+    }
+  },
+  "results": {
+    "title": "Результати сесії",
+    "topic": "Тема",
+    "difficulty": "Складність",
+    "noAnswers": "Ви не відповіли на жодне питання в цій сесії.",
+    "tryAgain": "Спробуйте пройти сесію знову!",
+    "questionNumber": "Питання",
+    "fullQuestion": "Повне питання:",
+    "yourAnswer": "Ваша відповідь:",
+    "noAnswerGiven": "Відповідь не було надано.",
+    "correctAnswer": "Еталонна відповідь",
+    "shortFeedback": "Короткий відгук:",
+    "detailedFeedback": "Детальний відгук",
+    "backToQuestions": "Назад до питань",
+    "newSession": "Почати нову сесію",
+    "exportResults": "Експортувати результати",
+    "noDataToExport": "Немає даних для експорту."
+  },
+  "theme": {
+    "light": "Світла",
+    "dark": "Темна",
+    "system": "Системна",
+    "tooltip": "Поточна тема: {{theme}}. Клікніть для перемикання"
+  },
+  "language": {
+    "tooltip": "Поточна мова: {{language}}. Клікніть для перемикання"
+  },
+  "topics": {
+    "frontend": "Frontend розробка",
+    "backend": "Backend розробка",
+    "fullstack": "Fullstack розробка",
+    "devops": "DevOps",
+    "mobile": "Мобільна розробка",
+    "data_science": "Наука про дані",
+    "machine_learning": "Машинне навчання",
+    "product_management": "Продакт-менеджмент",
+    "design": "UI/UX дизайн",
+    "qa": "Забезпечення якості",
+    "custom": "Користувацька тема"
+  },
+  "difficulties": {
+    "junior": "Молодший",
+    "middle": "Середній",
+    "senior": "Старший"
+  },
+  "common": {
+    "close": "Закрити",
+    "error": "Помилка",
+    "loading": "Завантаження...",
+    "retry": "Повторити",
+    "cancel": "Скасувати",
+    "confirm": "Підтвердити",
+    "save": "Зберегти",
+    "noResultsFound": "Результатів не знайдено"
+  }
+} 

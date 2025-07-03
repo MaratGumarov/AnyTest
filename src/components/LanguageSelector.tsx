@@ -13,6 +13,9 @@ const languageOptions: LanguageOption[] = [
   { code: 'en', name: 'English' },
   { code: 'ru', name: 'Русский' },
   { code: 'tt', name: 'Татарча' },
+  { code: 'uk', name: 'Українська' },
+  { code: 'es', name: 'Español' },
+  { code: 'pt', name: 'Português' },
 ];
 
 interface LanguageSelectorProps {
